@@ -44,31 +44,25 @@
                 <table>
                     <tr>
                         <td>Supplier</td>
-                        <td>: {{ $supplier->nama }}</td>
+                        <td>: {{ $member->name }}</td>
                     </tr>
                     <tr>
                         <td>Telepon</td>
-                        <td>: {{ $supplier->telepon }}</td>
-                    </tr>
-                    <tr>
-                        <td>Alamat</td>
-                        <td>: {{ $supplier->alamat }}</td>
+                        <td>: {{ $member->phone }}</td>
                     </tr>
                 </table>
             </div>
             <div class="box-body">
-                    
+
                 <form class="form-produk">
                     @csrf
                     <div class="form-group row">
-                        <label for="kode_produk" class="col-lg-2">Kode Produk</label>
+                        <label for="kode_produk" class="col-lg-2">Masukkan PIN</label>
                         <div class="col-lg-5">
                             <div class="input-group">
-                                <input type="hidden" name="id_pembelian" id="id_pembelian" value="{{ $id_pembelian }}">
-                                <input type="hidden" name="id_produk" id="id_produk">
-                                <input type="text" class="form-control" name="kode_produk" id="kode_produk">
+                                <input type="text" class="form-control" name="pin" id="pin">
                                 <span class="input-group-btn">
-                                    <button onclick="tampilProduk()" class="btn btn-info btn-flat" type="button"><i class="fa fa-arrow-right"></i></button>
+                                    <button onclick="supevisor()" class="btn btn-info btn-flat" type="button"><i class="fa fa-arrow-right"></i></button>
                                 </span>
                             </div>
                         </div>
@@ -81,7 +75,21 @@
                         <th>Kode</th>
                         <th>Nama</th>
                         <th>Harga</th>
-                        <th width="15%">Jumlah</th>
+                        <th>Jumlah</th>
+                        <th>
+                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                            <label onclick="percent()" class="btn btn-secondary active">
+                              <input type="radio" name="options1" id="option1" autocomplete="off" checked> Percent
+                            </label>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                <label onclick="amount()" class="btn btn-secondary">
+                                  <input type="radio" name="options2" id="option2" autocomplete="off"> Amount
+                                </label>
+                            </div>
+                        </th>
                         <th>Subtotal</th>
                         <th width="15%"><i class="fa fa-cog"></i></th>
                     </thead>
@@ -96,28 +104,72 @@
                         <form action="{{ route('pembelian.store') }}" class="form-pembelian" method="post">
                             @csrf
                             <input type="hidden" name="id_pembelian" value="{{ $id_pembelian }}">
+                            <input type="hidden" name="payment_status" value="sukses">
+                            <input type="hidden" name="order_status" value="offline">
+                            <input type="hidden" name="order_price" value=0>
+
+                            <input type="hidden" name="total_price" id="total_price" value="{{ $total }}">
+
                             <input type="hidden" name="total" id="total">
                             <input type="hidden" name="total_item" id="total_item">
                             <input type="hidden" name="bayar" id="bayar">
 
                             <div class="form-group row">
-                                <label for="totalrp" class="col-lg-2 control-label">Total</label>
+                                <label for="isSell" class="col-lg-4 control-label">is Sell ?</label>
+                                <div class="col-lg-6">
+                                    <select name="isSell" id="isSell" class="form-control">
+                                        <option value=0>Jual</option>
+                                        <option value=1>Beli</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            
+                            <div class="form-group row">
+                                <label for="diskon" class="col-lg-2 control-label">Diskon</label>
+                                <div class="col-lg-8">
+                                    <input type="number" name="diskon" id="diskon" class="form-control" value=0>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="order_price" class="col-lg-2 control-label">Order Price</label>
+                                <div class="col-lg-8">
+                                    <input type="text" id="order_price" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="payment_method" class="col-lg-4 control-label">Metode Pembayaran</label>
+                                <div class="col-lg-6">
+                                    <select name="payment_method" id="payment_method" class="form-control">
+                                        <option value="Tunai">Tunai</option>
+                                        <option value="Qris">Qris</option>
+                                        <option value="Rekening">Rekening</option>
+                                        <option value="Utang">Utang</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="total_price" class="col-lg-2 control-label">Total</label>
                                 <div class="col-lg-8">
                                     <input type="text" id="totalrp" class="form-control" readonly>
                                 </div>
                             </div>
+
                             <div class="form-group row">
-                                <label for="diskon" class="col-lg-2 control-label">Diskon</label>
+                                <label for="number" class="col-lg-2 control-label">Number</label>
                                 <div class="col-lg-8">
-                                    <input type="number" name="diskon" id="diskon" class="form-control" value="{{ $diskon }}">
+                                    <input name=number type="text" id="number" class="form-control">
                                 </div>
                             </div>
+
                             <div class="form-group row">
                                 <label for="bayar" class="col-lg-2 control-label">Bayar</label>
                                 <div class="col-lg-8">
                                     <input type="text" id="bayarrp" class="form-control">
                                 </div>
                             </div>
+
                         </form>
                     </div>
                 </div>
@@ -150,50 +202,58 @@
             },
             columns: [
                 {data: 'DT_RowIndex', searchable: false, sortable: false},
-                {data: 'kode_produk'},
-                {data: 'nama_produk'},
-                {data: 'harga_beli'},
-                {data: 'jumlah'},
-                {data: 'subtotal'},
+                {data: 'sku'},
+                {data: 'title'},
+                {data: 'base_price'},
+                {data: 'count'},
+                {data: 'diskon_percent'},
+                {data: 'diskon_amount'},
+                {data: 'final_price'},
                 {data: 'aksi', searchable: false, sortable: false},
             ],
             dom: 'Brt',
             bSort: false,
             paginate: false
         })
+
         .on('draw.dt', function () {
             loadForm($('#diskon').val());
         });
+
         table2 = $('.table-produk').DataTable();
 
-        $(document).on('input', '.quantity', function () {
+        $(document).on('input', '.discount_percent', function () {
             let id = $(this).data('id');
-            let jumlah = parseInt($(this).val());
 
-            if (jumlah < 1) {
-                $(this).val(1);
-                alert('Jumlah tidak boleh kurang dari 1');
-                return;
-            }
-            if (jumlah > 10000) {
-                $(this).val(10000);
-                alert('Jumlah tidak boleh lebih dari 10000');
-                return;
-            }
+            let discount = parseInt($(this).val());
 
             $.post(`{{ url('/pembelian_detail') }}/${id}`, {
                     '_token': $('[name=csrf-token]').attr('content'),
                     '_method': 'put',
-                    'jumlah': jumlah
+                    'discount': discount
                 })
                 .done(response => {
-                    $(this).on('mouseout', function () {
-                        table.ajax.reload(() => loadForm($('#diskon').val()));
-                    });
+                    table.ajax.reload();
                 })
                 .fail(errors => {
-                    alert('Tidak dapat menyimpan data');
-                    return;
+                    
+                });
+        });
+
+        $(document).on('input', '.discount_amount', function () {
+            let id = $(this).data('id');
+
+            let discount = parseInt($(this).val());
+
+            $.post(`{{ url('/pembelian_detail') }}/${id}`, {
+                    '_token': $('[name=csrf-token]').attr('content'),
+                    '_method': 'put',
+                    'discount': discount
+                })
+                .done(response => {
+                    table.ajax.reload();                    
+                })
+                .fail(errors => {
                 });
         });
 
@@ -210,32 +270,6 @@
         });
     });
 
-    function tampilProduk() {
-        $('#modal-produk').modal('show');
-    }
-
-    function hideProduk() {
-        $('#modal-produk').modal('hide');
-    }
-
-    function pilihProduk(id, kode) {
-        $('#id_produk').val(id);
-        $('#kode_produk').val(kode);
-        hideProduk();
-        tambahProduk();
-    }
-
-    function tambahProduk() {
-        $.post('{{ route('pembelian_detail.store') }}', $('.form-produk').serialize())
-            .done(response => {
-                $('#kode_produk').focus();
-                table.ajax.reload(() => loadForm($('#diskon').val()));
-            })
-            .fail(errors => {
-                alert('Tidak dapat menyimpan data');
-                return;
-            });
-    }
 
     function deleteData(url) {
         if (confirm('Yakin ingin menghapus data terpilih?')) {
@@ -244,13 +278,24 @@
                     '_method': 'delete'
                 })
                 .done((response) => {
-                    table.ajax.reload(() => loadForm($('#diskon').val()));
+                    table.ajax.reload();
                 })
                 .fail((errors) => {
                     alert('Tidak dapat menghapus data');
                     return;
                 });
         }
+    }
+
+    function percent() {
+        $('.discount_amount').hide();
+        $('.discount_percent').show();
+
+    }
+
+    function amount() {
+        $('.discount_percent').hide();
+        $('.discount_amount').show();
     }
 
     function loadForm(diskon = 0) {

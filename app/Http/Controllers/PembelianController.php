@@ -2,51 +2,62 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
 use Illuminate\Http\Request;
 use App\Models\Pembelian;
 use App\Models\PembelianDetail;
 use App\Models\Produk;
-use App\Models\Supplier;
+use App\Models\Member;
+use App\Models\Penjualan;
+use App\Models\ListProductTransaction;
+
+use GrahamCampbell\ResultType\Success;
 
 class PembelianController extends Controller
 {
     public function index()
     {
-        $supplier = Supplier::orderBy('nama')->get();
+        $member = Member::distinct('customer_type')->get();
+        $cart = Cart::with('member')
+        ->select('customer_id', 'employee_id')
+        ->where('isSend', 1)
+        ->where('flag', 0)
+        ->distinct()
+        ->get();
 
-        return view('pembelian.index', compact('supplier'));
+        return view('pembelian.index', compact('member','cart'));
     }
 
     public function data()
     {
-        $pembelian = Pembelian::orderBy('id_pembelian', 'desc')->get();
+        $penjualan = Penjualan::orderBy('id', 'desc')->get();
 
         return datatables()
-            ->of($pembelian)
+            ->of($penjualan)
             ->addIndexColumn()
-            ->addColumn('total_item', function ($pembelian) {
-                return format_uang($pembelian->total_item);
+            ->addColumn('tanggal', function ($penjualan) {
+                return tanggal_indonesia($penjualan->created_at, false);
             })
-            ->addColumn('total_harga', function ($pembelian) {
-                return 'Rp. '. format_uang($pembelian->total_harga);
+            ->addColumn('customer', function ($penjualan) {
+                return $penjualan->member->name;
             })
-            ->addColumn('bayar', function ($pembelian) {
-                return 'Rp. '. format_uang($pembelian->bayar);
+            ->addColumn('number', function ($penjualan) {
+                return format_uang($penjualan->number);
             })
-            ->addColumn('tanggal', function ($pembelian) {
-                return tanggal_indonesia($pembelian->created_at, false);
+            ->addColumn('total_harga', function ($penjualan) {
+                return 'Rp. '. format_uang($penjualan->total_price);
             })
-            ->addColumn('supplier', function ($pembelian) {
-                return $pembelian->supplier->nama;
+            ->editColumn('payment_method', function ($penjualan) {
+                return $penjualan->payment_method;
             })
-            ->editColumn('diskon', function ($pembelian) {
-                return $pembelian->diskon . '%';
+            ->addColumn('employee_id', function ($penjualan) {
+                return $penjualan->user->name;
             })
-            ->addColumn('aksi', function ($pembelian) {
+            ->addColumn('aksi', function ($penjualan) {
                 return '
                 <div class="btn-group">
-                    <button onclick="showDetail(`'. route('pembelian.show', $pembelian->id_pembelian) .'`)" class="btn btn-xs btn-info btn-flat"><i class="fa fa-eye"></i></button>
-                    <button onclick="deleteData(`'. route('pembelian.destroy', $pembelian->id_pembelian) .'`)" class="btn btn-xs btn-danger btn-flat"><i class="fa fa-trash"></i></button>
+                    <button onclick="showDetail(`'. route('pembelian.show', $penjualan->id) .'`)" class="btn btn-xs btn-info btn-flat"><i class="fa fa-eye"></i></button>
+                    <button onclick="deleteData(`'. route('pembelian.destroy', $penjualan->id) .'`)" class="btn btn-xs btn-danger btn-flat"><i class="fa fa-trash"></i></button>
                 </div>
                 ';
             })
@@ -56,60 +67,75 @@ class PembelianController extends Controller
 
     public function create($id)
     {
-        $pembelian = new Pembelian();
-        $pembelian->id_supplier = $id;
-        $pembelian->total_item  = 0;
-        $pembelian->total_harga = 0;
-        $pembelian->diskon      = 0;
-        $pembelian->bayar       = 0;
+        $cart    = Cart::select('id', 'employee_id')->where('customer_id', $id)->get();
+        $x = auth()->id();
+        $pembelian = new Penjualan();
+        $pembelian->customer_id         = $id;
+        $pembelian->employee_id         = $x;
+        $pembelian->number              = 0;
+        $pembelian->total_price         = 0;
+        $pembelian->order_price         = 0;
+        $pembelian->payment_status      = '';
+        $pembelian->payment_method      = '';
+        $pembelian->order_status        = '';
+        $pembelian->isSell              = 0;
+
         $pembelian->save();
 
-        session(['id_pembelian' => $pembelian->id_pembelian]);
-        session(['id_supplier' => $pembelian->id_supplier]);
+        session(['transaction_id' => $pembelian->id]);
+        session(['customer_id' => $pembelian->customer_id]);
 
         return redirect()->route('pembelian_detail.index');
+
     }
 
     public function store(Request $request)
     {
-        $pembelian = Pembelian::findOrFail($request->id_pembelian);
-        $pembelian->total_item = $request->total_item;
-        $pembelian->total_harga = $request->total;
-        $pembelian->diskon = $request->diskon;
-        $pembelian->bayar = $request->bayar;
+        $pembelian = Penjualan::findOrFail($request->id_pembelian);
+        $pembelian->number = $request->number;
+        $pembelian->total_price = $request->total_price;
+        $pembelian->payment_status = $request->payment_status;
+        $pembelian->payment_method = $request->payment_method;
+        $pembelian->order_status = $request->order_status;
+        $pembelian->order_price = $request->order_price;
+        $pembelian->isSell = $request->isSell;
         $pembelian->update();
-
-        $detail = PembelianDetail::where('id_pembelian', $pembelian->id_pembelian)->get();
-        foreach ($detail as $item) {
-            $produk = Produk::find($item->id_produk);
-            $produk->stok += $item->jumlah;
-            $produk->update();
+        
+        $bayar = $request->bayar;
+        $total=$request->total;
+        $diskon=$request->diskon;
+        
+        $cart = Cart::where('customer_id', $pembelian->customer_id)->get();
+        foreach ($cart as $item) {
+            $item->flag = 1;
+            $item->update();
         }
+        
+        session(['total' => $total]);
+        session(['diskon' => $diskon]);
+        session(['bayar' => $bayar]);
 
-        return redirect()->route('pembelian.index');
+        return redirect()->route('pembelian.selesai');
     }
 
     public function show($id)
     {
-        $detail = PembelianDetail::with('produk')->where('id_pembelian', $id)->get();
+        $detail = ListProductTransaction::where('transaction_id', $id)->get();
 
         return datatables()
             ->of($detail)
             ->addIndexColumn()
             ->addColumn('kode_produk', function ($detail) {
-                return '<span class="label label-success">'. $detail->produk->kode_produk .'</span>';
+                return '<span class="label label-success">'. $detail->produk->id .'</span>';
             })
             ->addColumn('nama_produk', function ($detail) {
-                return $detail->produk->nama_produk;
-            })
-            ->addColumn('harga_beli', function ($detail) {
-                return 'Rp. '. format_uang($detail->harga_beli);
+                return $detail->produk->title;
             })
             ->addColumn('jumlah', function ($detail) {
-                return format_uang($detail->jumlah);
+                return format_uang($detail->count);
             })
-            ->addColumn('subtotal', function ($detail) {
-                return 'Rp. '. format_uang($detail->subtotal);
+            ->addColumn('total_price', function ($detail) {
+                return 'Rp. '. format_uang($detail->base_price * $detail->count);
             })
             ->rawColumns(['kode_produk'])
             ->make(true);
@@ -117,12 +143,13 @@ class PembelianController extends Controller
 
     public function destroy($id)
     {
-        $pembelian = Pembelian::find($id);
-        $detail    = PembelianDetail::where('id_pembelian', $pembelian->id_pembelian)->get();
+        $pembelian = Penjualan::find($id);
+        $detail    = ListProductTransaction::where('transaction_id', $pembelian->id)->get();
+        
         foreach ($detail as $item) {
-            $produk = Produk::find($item->id_produk);
+            $produk = Produk::find($item->id);
             if ($produk) {
-                $produk->stok -= $item->jumlah;
+                $produk->stock -= $item->count;
                 $produk->update();
             }
             $item->delete();
@@ -131,5 +158,32 @@ class PembelianController extends Controller
         $pembelian->delete();
 
         return response(null, 204);
+    }
+
+    public function selesai()
+    {
+        return view('pembelian.selesai');
+    }
+
+
+    public function nota(){
+        $id_penjualan = session('transaction_id');
+        $id_customer = session('customer_id');
+        $total = session('total');
+        $diskon = session('diskon');
+        $bayar = session('bayar');
+
+        $transaksi = Pembelian::find(session('transaction_id'));
+        $customer = Member::find(session('customer_id'));
+
+        $detail = Cart::
+        where('flag', 1)
+        ->where('isSend', 1)
+        ->where('customer_id', $customer->id)                        
+        ->get();
+
+       
+        return view('pembelian.nota_kecil', compact('detail', 'transaksi', 'customer','total','diskon', 'bayar'));
+
     }
 }

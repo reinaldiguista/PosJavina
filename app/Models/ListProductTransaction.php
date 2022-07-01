@@ -5,23 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Member extends Model
+class ListProductTransaction extends Model
 {
     use HasFactory;
 
-    protected $table = 'customer';
+    protected $table = 'list_product_transaction';
     protected $primaryKey = 'id';
     protected $guarded = [];
 
-    public function cart()
-    {
-        return $this->hasMany(Cart::class);
-    }
-
     public function transaction()
     {
-        return $this->hasMany(Penjualan::class);
+        return $this->belongsTo(Transaction::class);
     }
-
     
+    public function produk()
+    {
+        return $this->belongsTo(Produk::class, 'product_id', 'id');
+    }
 }

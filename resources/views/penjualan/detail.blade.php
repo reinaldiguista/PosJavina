@@ -10,10 +10,9 @@
                 <table class="table table-striped table-bordered table-detail">
                     <thead>
                         <th width="5%">No</th>
-                        <th>Kode</th>
-                        <th>Nama</th>
-                        <th>Harga</th>
-                        <th>Jumlah</th>
+                        <th>Product Id</th>
+                        <th>Base Price</th>
+                        <th>Count</th>
                         <th>Subtotal</th>
                     </thead>
                 </table>

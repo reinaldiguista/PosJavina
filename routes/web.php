@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\{
+    CartController,
     DashboardController,
-    KategoriController,
     LaporanController,
     ProdukController,
     MemberController,
@@ -36,17 +36,27 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::group(['middleware' => 'level:1'], function () {
-        Route::get('/kategori/data', [KategoriController::class, 'data'])->name('kategori.data');
-        Route::resource('/kategori', KategoriController::class);
+      
 
         Route::get('/produk/data', [ProdukController::class, 'data'])->name('produk.data');
         Route::post('/produk/delete-selected', [ProdukController::class, 'deleteSelected'])->name('produk.delete_selected');
-        Route::post('/produk/cetak-barcode', [ProdukController::class, 'cetakBarcode'])->name('produk.cetak_barcode');
+        // Route::post('/produk/cetak-barcode', [ProdukController::class, 'cetakBarcode'])->name('produk.cetak_barcode');
         Route::resource('/produk', ProdukController::class);
 
         Route::get('/member/data', [MemberController::class, 'data'])->name('member.data');
         Route::post('/member/cetak-member', [MemberController::class, 'cetakMember'])->name('member.cetak_member');
         Route::resource('/member', MemberController::class);
+
+        Route::get('/cart/data', [CartController::class, 'data'])->name('cart.data');
+        Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+        Route::get('/cart/{id}', [CartController::class, 'show'])->name('cart.show');
+        Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+
+
+        Route::get('/penjualan/data', [PenjualanController::class, 'data'])->name('penjualan.data');
+        Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
+        Route::get('/penjualan/{id}', [PenjualanController::class, 'show'])->name('penjualan.show');
+
 
         Route::get('/supplier/data', [SupplierController::class, 'data'])->name('supplier.data');
         Route::resource('/supplier', SupplierController::class);
@@ -55,10 +65,16 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('/pengeluaran', PengeluaranController::class);
 
         Route::get('/pembelian/data', [PembelianController::class, 'data'])->name('pembelian.data');
+        Route::get('/pembelian/nota', [PembelianController::class, 'nota'])->name('pembelian.nota');
+
+        Route::get('/pembelian/selesai', [PembelianController::class, 'selesai'])->name('pembelian.selesai');
         Route::get('/pembelian/{id}/create', [PembelianController::class, 'create'])->name('pembelian.create');
         Route::resource('/pembelian', PembelianController::class)
-            ->except('create');
+            ->except('create');     
+        Route::get('/pembelian/nota-kecil', [PembelianController::class, 'notaKecil'])->name('pembelian.nota_kecil');
+        // Route::get('/pembelian/member', [PembelianController::class, 'member'])->name('pembelian.member');
 
+        Route::get('/pembelian_detail/nota-kecil', [PembelianDetailController::class, 'notaKecil'])->name('pembelian_detail.notaKecil');
         Route::get('/pembelian_detail/{id}/data', [PembelianDetailController::class, 'data'])->name('pembelian_detail.data');
         Route::get('/pembelian_detail/loadform/{diskon}/{total}', [PembelianDetailController::class, 'loadForm'])->name('pembelian_detail.load_form');
         Route::resource('/pembelian_detail', PembelianDetailController::class)
@@ -74,7 +90,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/transaksi/baru', [PenjualanController::class, 'create'])->name('transaksi.baru');
         Route::post('/transaksi/simpan', [PenjualanController::class, 'store'])->name('transaksi.simpan');
         Route::get('/transaksi/selesai', [PenjualanController::class, 'selesai'])->name('transaksi.selesai');
-        Route::get('/transaksi/nota-kecil', [PenjualanController::class, 'notaKecil'])->name('transaksi.nota_kecil');
+        Route::get('/transaksi/{id}/create', [PenjualanController::class, 'create'])->name('transaksi.create');
         Route::get('/transaksi/nota-besar', [PenjualanController::class, 'notaBesar'])->name('transaksi.nota_besar');
 
         Route::get('/transaksi/{id}/data', [PenjualanDetailController::class, 'data'])->name('transaksi.data');

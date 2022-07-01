@@ -63,4 +63,13 @@ class User extends Authenticatable
     {
         return $query->where('level', '!=', 1);
     }
+    public function cart()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    public function transaction()
+    {
+        return $this->hasMany(Penjualan::class);
+    }
 }

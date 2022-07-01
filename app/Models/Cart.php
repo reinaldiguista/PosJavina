@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Pembelian extends Model
+class Cart extends Model
 {
     use HasFactory;
 
-    protected $table = 'transaction';
+    protected $table = 'cart';
     protected $primaryKey = 'id';
     protected $guarded = [];
 
@@ -17,9 +17,12 @@ class Pembelian extends Model
     {
         return $this->belongsTo(Member::class, 'customer_id', 'id');
     }
+    public function produk()
+    {
+        return $this->belongsTo(Produk::class, 'product_id', 'id');
+    }
     public function user()
     {
         return $this->belongsTo(User::class, 'employee_id', 'id');
     }
-    
 }

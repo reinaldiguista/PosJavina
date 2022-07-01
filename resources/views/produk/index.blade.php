@@ -15,9 +15,9 @@
         <div class="box">
             <div class="box-header with-border">
                 <div class="btn-group">
-                    <button onclick="addForm('{{ route('produk.store') }}')" class="btn btn-success btn-xs btn-flat"><i class="fa fa-plus-circle"></i> Tambah</button>
+                        <button onclick="addForm('{{ route('produk.store') }}')" class="btn btn-success btn-xs btn-flat"><i class="fa fa-plus-circle"></i> Tambah</button>
                     <button onclick="deleteSelected('{{ route('produk.delete_selected') }}')" class="btn btn-danger btn-xs btn-flat"><i class="fa fa-trash"></i> Hapus</button>
-                    <button onclick="cetakBarcode('{{ route('produk.cetak_barcode') }}')" class="btn btn-info btn-xs btn-flat"><i class="fa fa-barcode"></i> Cetak Barcode</button>
+                    {{-- <button onclick="cetakBarcode('{{ route('produk.cetak_barcode') }}')" class="btn btn-info btn-xs btn-flat"><i class="fa fa-barcode"></i> Cetak Barcode</button> --}}
                 </div>
             </div>
             <div class="box-body table-responsive">
@@ -30,13 +30,11 @@
                             </th>
                             <th width="5%">No</th>
                             <th>Kode</th>
-                            <th>Nama</th>
-                            <th>Kategori</th>
-                            <th>Merk</th>
-                            <th>Harga Beli</th>
-                            <th>Harga Jual</th>
-                            <th>Diskon</th>
-                            <th>Stok</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Volmetric</th>
+                            <th>price</th>
+                            <th>stock</th>
                             <th width="15%"><i class="fa fa-cog"></i></th>
                         </thead>
                     </table>
@@ -66,13 +64,11 @@
                 {data: 'select_all', searchable: false, sortable: false},
                 {data: 'DT_RowIndex', searchable: false, sortable: false},
                 {data: 'kode_produk'},
-                {data: 'nama_produk'},
-                {data: 'nama_kategori'},
-                {data: 'merk'},
-                {data: 'harga_beli'},
-                {data: 'harga_jual'},
-                {data: 'diskon'},
-                {data: 'stok'},
+                {data: 'title'},
+                {data: 'description'},
+                {data: 'volmetric'},
+                {data: 'price'},
+                {data: 'stock'},
                 {data: 'aksi', searchable: false, sortable: false},
             ]
         });
@@ -103,7 +99,7 @@
         $('#modal-form form')[0].reset();
         $('#modal-form form').attr('action', url);
         $('#modal-form [name=_method]').val('post');
-        $('#modal-form [name=nama_produk]').focus();
+        $('#modal-form [name=title]').focus();
     }
 
     function editForm(url) {
@@ -113,17 +109,25 @@
         $('#modal-form form')[0].reset();
         $('#modal-form form').attr('action', url);
         $('#modal-form [name=_method]').val('put');
-        $('#modal-form [name=nama_produk]').focus();
+        $('#modal-form [name=title]').focus();
 
         $.get(url)
             .done((response) => {
-                $('#modal-form [name=nama_produk]').val(response.nama_produk);
-                $('#modal-form [name=id_kategori]').val(response.id_kategori);
-                $('#modal-form [name=merk]').val(response.merk);
-                $('#modal-form [name=harga_beli]').val(response.harga_beli);
-                $('#modal-form [name=harga_jual]').val(response.harga_jual);
-                $('#modal-form [name=diskon]').val(response.diskon);
-                $('#modal-form [name=stok]').val(response.stok);
+                $('#modal-form [name=title]').val(response.title);
+                $('#modal-form [name=sku]').val(response.sku);
+                $('#modal-form [name=description]').val(response.desc);
+                $('#modal-form [name=length]').val(response.length);
+                $('#modal-form [name=width]').val(response.width);
+                $('#modal-form [name=height]').val(response.height);
+                $('#modal-form [name=volmetric]').val(response.volmetric);
+                $('#modal-form [name=price]').val(response.price);
+                $('#modal-form [name=agen_price]').val(response.agen_price);
+                $('#modal-form [name=reseller_price]').val(response.reseller_price);
+                $('#modal-form [name=offline_price]').val(response.offline_price);
+                $('#modal-form [name=handling_fee]').val(response.handling_fee);
+                $('#modal-form [name=stock]').val(response.stock);
+                $('#modal-form [name=stock_offline]').val(response.stock_offline);
+                $('#modal-form [name=discount]').val(response.discount);
             })
             .fail((errors) => {
                 alert('Tidak dapat menampilkan data');
@@ -165,19 +169,19 @@
         }
     }
 
-    function cetakBarcode(url) {
-        if ($('input:checked').length < 1) {
-            alert('Pilih data yang akan dicetak');
-            return;
-        } else if ($('input:checked').length < 3) {
-            alert('Pilih minimal 3 data untuk dicetak');
-            return;
-        } else {
-            $('.form-produk')
-                .attr('target', '_blank')
-                .attr('action', url)
-                .submit();
-        }
-    }
+    // function cetakBarcode(url) {
+    //     if ($('input:checked').length < 1) {
+    //         alert('Pilih data yang akan dicetak');
+    //         return;
+    //     } else if ($('input:checked').length < 3) {
+    //         alert('Pilih minimal 3 data untuk dicetak');
+    //         return;
+    //     } else {
+    //         $('.form-produk')
+    //             .attr('target', '_blank')
+    //             .attr('action', url)
+    //             .submit();
+    //     }
+    // }
 </script>
 @endpush

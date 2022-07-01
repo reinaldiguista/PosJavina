@@ -2,16 +2,16 @@
     <!-- Logo -->
     <a href="index2.html" class="logo">
         <!-- mini logo for sidebar mini 50x50 pixels -->
-        @php
-            $words = explode(' ', $setting->nama_perusahaan);
+        {{-- @php
+            $words = explode(' ', "Kasir");
             $word  = '';
             foreach ($words as $w) {
                 $word .= $w[0];
             }
-        @endphp
-        <span class="logo-mini">{{ $word }}</span>
+        @endphp --}}
+        <span class="logo-mini">POS</span>
         <!-- logo for regular state and mobile devices -->
-        <span class="logo-lg"><b>{{ $setting->nama_perusahaan }}</b></span>
+        <span class="logo-lg"><b>POS</b></span>
     </a>
     <!-- Header Navbar: style can be found in header.less -->
     <nav class="navbar navbar-static-top">

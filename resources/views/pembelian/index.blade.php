@@ -1,12 +1,12 @@
 @extends('layouts.master')
 
 @section('title')
-    Daftar Pembelian
+    Daftar Penjualan
 @endsection
 
 @section('breadcrumb')
     @parent
-    <li class="active">Daftar Pembelian</li>
+    <li class="active">Daftar Penjualan</li>
 @endsection
 
 @section('content')
@@ -24,11 +24,11 @@
                     <thead>
                         <th width="5%">No</th>
                         <th>Tanggal</th>
-                        <th>Supplier</th>
-                        <th>Total Item</th>
+                        <th>Customer</th>
+                        <th>Number</th>
                         <th>Total Harga</th>
-                        <th>Diskon</th>
-                        <th>Total Bayar</th>
+                        <th>Payment Method</th>
+                        <th>Employee</th>
                         <th width="15%"><i class="fa fa-cog"></i></th>
                     </thead>
                 </table>
@@ -37,7 +37,7 @@
     </div>
 </div>
 
-@includeIf('pembelian.supplier')
+@includeIf('pembelian.cart')
 @includeIf('pembelian.detail')
 @endsection
 
@@ -57,16 +57,16 @@
             columns: [
                 {data: 'DT_RowIndex', searchable: false, sortable: false},
                 {data: 'tanggal'},
-                {data: 'supplier'},
-                {data: 'total_item'},
+                {data: 'customer'},
+                {data: 'number'},
                 {data: 'total_harga'},
-                {data: 'diskon'},
-                {data: 'bayar'},
+                {data: 'payment_method'},
+                {data: 'employee_id'},
                 {data: 'aksi', searchable: false, sortable: false},
             ]
         });
 
-        $('.table-supplier').DataTable();
+        $('.table-cart').DataTable();
         table1 = $('.table-detail').DataTable({
             processing: true,
             bSort: false,
@@ -75,15 +75,14 @@
                 {data: 'DT_RowIndex', searchable: false, sortable: false},
                 {data: 'kode_produk'},
                 {data: 'nama_produk'},
-                {data: 'harga_beli'},
                 {data: 'jumlah'},
-                {data: 'subtotal'},
+                {data: 'total_price'},
             ]
         })
     });
 
     function addForm() {
-        $('#modal-supplier').modal('show');
+        $('#modal-cart').modal('show');
     }
 
     function showDetail(url) {

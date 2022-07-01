@@ -45,11 +45,11 @@
                 <form class="form-produk">
                     @csrf
                     <div class="form-group row">
-                        <label for="kode_produk" class="col-lg-2">Kode Produk</label>
+                        <label for="kode_produk" class="col-lg-2">Pilih Cart</label>
                         <div class="col-lg-5">
                             <div class="input-group">
-                                <input type="hidden" name="id_penjualan" id="id_penjualan" value="{{ $id_penjualan }}">
-                                <input type="hidden" name="id_produk" id="id_produk">
+                                {{-- <input type="hidden" name="id_penjualan" id="id_penjualan" value="{{ $id_penjualan }}">
+                                <input type="hidden" name="id_produk" id="id_produk"> --}}
                                 <input type="text" class="form-control" name="kode_produk" id="kode_produk">
                                 <span class="input-group-btn">
                                     <button onclick="tampilProduk()" class="btn btn-info btn-flat" type="button"><i class="fa fa-arrow-right"></i></button>
@@ -72,7 +72,7 @@
                     </thead>
                 </table>
 
-                <div class="row">
+                {{-- <div class="row">
                     <div class="col-lg-8">
                         <div class="tampil-bayar bg-primary"></div>
                         <div class="tampil-terbilang"></div>
@@ -131,7 +131,7 @@
                             </div>
                         </form>
                     </div>
-                </div>
+                </div> --}}
             </div>
 
             <div class="box-footer">
@@ -145,7 +145,7 @@
 @includeIf('penjualan_detail.member')
 @endsection
 
-@push('scripts')
+{{-- @push('scripts')
 <script>
     let table, table2;
 
@@ -320,4 +320,4 @@
             })
     }
 </script>
-@endpush
+@endpush --}}

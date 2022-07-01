@@ -12,13 +12,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group row">
-                        <label for="nama_produk" class="col-lg-2 col-lg-offset-1 control-label">Nama</label>
+                        <label for="title" class="col-lg-2 col-lg-offset-1 control-label">Nama</label>
                         <div class="col-lg-6">
-                            <input type="text" name="nama_produk" id="nama_produk" class="form-control" required autofocus>
+                            <input type="text" name="title" id="title" class="form-control" required autofocus>
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>
-                    <div class="form-group row">
+                    {{-- <div class="form-group row">
                         <label for="id_kategori" class="col-lg-2 col-lg-offset-1 control-label">Kategori</label>
                         <div class="col-lg-6">
                             <select name="id_kategori" id="id_kategori" class="form-control" required>
@@ -29,39 +29,81 @@
                             </select>
                             <span class="help-block with-errors"></span>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="form-group row">
-                        <label for="merk" class="col-lg-2 col-lg-offset-1 control-label">Merk</label>
+                        <label for="sku" class="col-lg-2 col-lg-offset-1 control-label">sku</label>
                         <div class="col-lg-6">
-                            <input type="text" name="merk" id="merk" class="form-control">
+                            <input type="text" name="sku" id="sku" class="form-control" required autofocus>
+                            <span class="help-block with-errors"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="description" class="col-lg-2 col-lg-offset-1 control-label">description</label>
+                        <div class="col-lg-6">
+                            <textarea type="text" name="description" id="description" class="form-control"></textarea>
+                            <span class="help-block with-errors"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <label for="volmetric" class="col-lg-2 col-lg-offset-1 control-label">volmetric</label>
+                        <div class="col-lg-6">
+                            <input type="float" name="volmetric" id="volmetric" class="form-control" required>
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="harga_beli" class="col-lg-2 col-lg-offset-1 control-label">Harga Beli</label>
+                        <label for="price" class="col-lg-2 col-lg-offset-1 control-label">price</label>
                         <div class="col-lg-6">
-                            <input type="number" name="harga_beli" id="harga_beli" class="form-control" required>
+                            <input type="number" name="price" id="price" class="form-control" required>
+                            <span class="help-block with-errors"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="agen_price" class="col-lg-2 col-lg-offset-1 control-label">agen_price</label>
+                        <div class="col-lg-6">
+                            <input type="number" name="agen_price" id="agen_price" class="form-control" required>
+                            <span class="help-block with-errors"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="reseller_price" class="col-lg-2 col-lg-offset-1 control-label">reseller_price</label>
+                        <div class="col-lg-6">
+                            <input type="number" name="reseller_price" id="reseller_price" class="form-control" required>
+                            <span class="help-block with-errors"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="offline_price" class="col-lg-2 col-lg-offset-1 control-label">offline_price</label>
+                        <div class="col-lg-6">
+                            <input type="number" name="offline_price" id="offline_price" class="form-control" required>
+                            <span class="help-block with-errors"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="handling_fee" class="col-lg-2 col-lg-offset-1 control-label">handling_fee</label>
+                        <div class="col-lg-6">
+                            <input type="number" name="handling_fee" id="handling_fee" class="form-control" required>
+                            <span class="help-block with-errors"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="stock" class="col-lg-2 col-lg-offset-1 control-label">stock</label>
+                        <div class="col-lg-6">
+                            <input type="number" name="stock" id="stock" class="form-control" value="0">
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="harga_jual" class="col-lg-2 col-lg-offset-1 control-label">Harga Jual</label>
+                        <label for="stock_offline" class="col-lg-2 col-lg-offset-1 control-label">stock_offline</label>
                         <div class="col-lg-6">
-                            <input type="number" name="harga_jual" id="harga_jual" class="form-control" required>
-                            <span class="help-block with-errors"></span>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="diskon" class="col-lg-2 col-lg-offset-1 control-label">Diskon</label>
-                        <div class="col-lg-6">
-                            <input type="number" name="diskon" id="diskon" class="form-control" value="0">
-                            <span class="help-block with-errors"></span>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="stok" class="col-lg-2 col-lg-offset-1 control-label">Stok</label>
-                        <div class="col-lg-6">
-                            <input type="number" name="stok" id="stok" class="form-control" required value="0">
+                            <input type="number" name="stock_offline" id="stock_offline" class="form-control" required value="0">
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>

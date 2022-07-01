@@ -12,23 +12,23 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group row">
-                        <label for="nama" class="col-lg-2 col-lg-offset-1 control-label">Nama</label>
+                        <label for="name" class="col-lg-2 col-lg-offset-1 control-label">name</label>
                         <div class="col-lg-6">
-                            <input type="text" name="nama" id="nama" class="form-control" required autofocus>
+                            <input type="text" name="name" id="name" class="form-control" required autofocus>
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="telepon" class="col-lg-2 col-lg-offset-1 control-label">Telepon</label>
+                        <label for="phone" class="col-lg-2 col-lg-offset-1 control-label">phone</label>
                         <div class="col-lg-6">
-                            <input type="text" name="telepon" id="telepon" class="form-control" required>
+                            <input type="text" name="phone" id="phone" class="form-control" required>
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="alamat" class="col-lg-2 col-lg-offset-1 control-label">Alamat</label>
+                        <label for="customer_type" class="col-lg-2 col-lg-offset-1 control-label">customer_type</label>
                         <div class="col-lg-6">
-                            <textarea name="alamat" id="alamat" rows="3" class="form-control"></textarea>
+                            <input type="text" name="customer_type" id="customer_type" rows="3" class="form-control" required>
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>

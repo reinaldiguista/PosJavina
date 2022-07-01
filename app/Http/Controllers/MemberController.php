@@ -21,24 +21,30 @@ class MemberController extends Controller
 
     public function data()
     {
-        $member = Member::orderBy('kode_member')->get();
+        $member = Member::orderBy('name')->get();
 
         return datatables()
             ->of($member)
             ->addIndexColumn()
-            ->addColumn('select_all', function ($produk) {
+            ->addColumn('select_all', function ($member) {
                 return '
-                    <input type="checkbox" name="id_member[]" value="'. $produk->id_member .'">
+                    <input type="checkbox" name="id[]" value="'. $member->id .'">
                 ';
             })
-            ->addColumn('kode_member', function ($member) {
-                return '<span class="label label-success">'. $member->kode_member .'<span>';
+            ->addColumn('name', function ($member) {
+                return $member->name ;
+            })
+            ->addColumn('phone', function ($member) {
+                return $member->phone ;
+            })
+            ->addColumn('customer_type', function ($member) {
+                return $member->customer_type ;
             })
             ->addColumn('aksi', function ($member) {
                 return '
                 <div class="btn-group">
-                    <button type="button" onclick="editForm(`'. route('member.update', $member->id_member) .'`)" class="btn btn-xs btn-info btn-flat"><i class="fa fa-pencil"></i></button>
-                    <button type="button" onclick="deleteData(`'. route('member.destroy', $member->id_member) .'`)" class="btn btn-xs btn-danger btn-flat"><i class="fa fa-trash"></i></button>
+                    <button type="button" onclick="editForm(`'. route('member.update', $member->id) .'`)" class="btn btn-xs btn-info btn-flat"><i class="fa fa-pencil"></i></button>
+                    <button type="button" onclick="deleteData(`'. route('member.destroy', $member->id) .'`)" class="btn btn-xs btn-danger btn-flat"><i class="fa fa-trash"></i></button>
                 </div>
                 ';
             })
@@ -65,13 +71,11 @@ class MemberController extends Controller
     public function store(Request $request)
     {
         $member = Member::latest()->first() ?? new Member();
-        $kode_member = (int) $member->kode_member +1;
 
         $member = new Member();
-        $member->kode_member = tambah_nol_didepan($kode_member, 5);
-        $member->nama = $request->nama;
-        $member->telepon = $request->telepon;
-        $member->alamat = $request->alamat;
+        $member->name = $request->name;
+        $member->phone = $request->phone;
+        $member->customer_type = $request->customer_type;
         $member->save();
 
         return response()->json('Data berhasil disimpan', 200);
@@ -129,20 +133,25 @@ class MemberController extends Controller
         return response(null, 204);
     }
 
-    public function cetakMember(Request $request)
+    // public function cetakMember(Request $request)
+    // {
+    //     $datamember = collect(array());
+    //     foreach ($request->id_member as $id) {
+    //         $member = Member::find($id);
+    //         $datamember[] = $member;
+    //     }
+
+    //     $datamember = $datamember->chunk(2);
+    //     $setting    = Setting::first();
+
+    //     $no  = 1;
+    //     $pdf = PDF::loadView('member.cetak', compact('datamember', 'no', 'setting'));
+    //     $pdf->setPaper(array(0, 0, 566.93, 850.39), 'potrait');
+    //     return $pdf->stream('member.pdf');
+    // }
+
+    public function cart_customer()
     {
-        $datamember = collect(array());
-        foreach ($request->id_member as $id) {
-            $member = Member::find($id);
-            $datamember[] = $member;
-        }
-
-        $datamember = $datamember->chunk(2);
-        $setting    = Setting::first();
-
-        $no  = 1;
-        $pdf = PDF::loadView('member.cetak', compact('datamember', 'no', 'setting'));
-        $pdf->setPaper(array(0, 0, 566.93, 850.39), 'potrait');
-        return $pdf->stream('member.pdf');
+        return view('member.index');
     }
 }

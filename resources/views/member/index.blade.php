@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    Daftar Member
+    Daftar Customer
 @endsection
 
 @section('breadcrumb')
@@ -15,7 +15,6 @@
         <div class="box">
             <div class="box-header with-border">
                 <button onclick="addForm('{{ route('member.store') }}')" class="btn btn-success btn-xs btn-flat"><i class="fa fa-plus-circle"></i> Tambah</button>
-                <button onclick="cetakMember('{{ route('member.cetak_member') }}')" class="btn btn-info btn-xs btn-flat"><i class="fa fa-id-card"></i> Cetak Member</button>
             </div>
             <div class="box-body table-responsive">
                 <form action="" method="post" class="form-member">
@@ -26,10 +25,9 @@
                                 <input type="checkbox" name="select_all" id="select_all">
                             </th>
                             <th width="5%">No</th>
-                            <th>Kode</th>
-                            <th>Nama</th>
-                            <th>Telepon</th>
-                            <th>Alamat</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Customer_type</th>
                             <th width="15%"><i class="fa fa-cog"></i></th>
                         </thead>
                     </table>
@@ -58,10 +56,9 @@
             columns: [
                 {data: 'select_all', searchable: false, sortable: false},
                 {data: 'DT_RowIndex', searchable: false, sortable: false},
-                {data: 'kode_member'},
-                {data: 'nama'},
-                {data: 'telepon'},
-                {data: 'alamat'},
+                {data: 'name'},
+                {data: 'phone'},
+                {data: 'customer_type'},
                 {data: 'aksi', searchable: false, sortable: false},
             ]
         });
@@ -87,28 +84,28 @@
 
     function addForm(url) {
         $('#modal-form').modal('show');
-        $('#modal-form .modal-title').text('Tambah Member');
+        $('#modal-form .modal-title').text('Tambah Customer');
 
         $('#modal-form form')[0].reset();
         $('#modal-form form').attr('action', url);
         $('#modal-form [name=_method]').val('post');
-        $('#modal-form [name=nama]').focus();
+        $('#modal-form [name=name]').focus();
     }
 
     function editForm(url) {
         $('#modal-form').modal('show');
-        $('#modal-form .modal-title').text('Edit Member');
+        $('#modal-form .modal-title').text('Edit Customer');
 
         $('#modal-form form')[0].reset();
         $('#modal-form form').attr('action', url);
         $('#modal-form [name=_method]').val('put');
-        $('#modal-form [name=nama]').focus();
+        $('#modal-form [name=name]').focus();
 
         $.get(url)
             .done((response) => {
-                $('#modal-form [name=nama]').val(response.nama);
-                $('#modal-form [name=telepon]').val(response.telepon);
-                $('#modal-form [name=alamat]').val(response.alamat);
+                $('#modal-form [name=name]').val(response.name);
+                $('#modal-form [name=phone]').val(response.phone);
+                $('#modal-form [name=customer_type]').val(response.customer_type);
             })
             .fail((errors) => {
                 alert('Tidak dapat menampilkan data');
@@ -132,16 +129,16 @@
         }
     }
 
-    function cetakMember(url) {
-        if ($('input:checked').length < 1) {
-            alert('Pilih data yang akan dicetak');
-            return;
-        } else {
-            $('.form-member')
-                .attr('target', '_blank')
-                .attr('action', url)
-                .submit();
-        }
-    }
+    // function cetakMember(url) {
+    //     if ($('input:checked').length < 1) {
+    //         alert('Pilih data yang akan dicetak');
+    //         return;
+    //     } else {
+    //         $('.form-member')
+    //             .attr('target', '_blank')
+    //             .attr('action', url)
+    //             .submit();
+    //     }
+    // }
 </script>
 @endpush
