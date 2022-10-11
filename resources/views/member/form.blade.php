@@ -28,10 +28,17 @@
                     <div class="form-group row">
                         <label for="customer_type" class="col-lg-2 col-lg-offset-1 control-label">customer_type</label>
                         <div class="col-lg-6">
-                            <input type="text" name="customer_type" id="customer_type" rows="3" class="form-control" required>
+                            <select class="form-control" id="customerType-option" name="customer_type">
+                                @foreach ($customerType as $customerType)
+                                    <option value="{{ $customerType->id }}">{{ $customerType->role }}</option>
+                                @endforeach
+                            </select>
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>
+
+                   
+
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-sm btn-flat btn-primary"><i class="fa fa-save"></i> Simpan</button>

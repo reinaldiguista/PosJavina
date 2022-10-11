@@ -33,80 +33,51 @@
                     <div class="form-group row">
                         <label for="sku" class="col-lg-2 col-lg-offset-1 control-label">sku</label>
                         <div class="col-lg-6">
-                            <input type="text" name="sku" id="sku" class="form-control" required autofocus>
+                            <input type="text" name="sku" id="sku" class="form-control" val="sku" autofocus>
+                            {{-- <span class="help-block with-errors"></span> --}}
+                        </div>
+                    </div>
+                   
+                    <div class="form-group row">
+                        <label for="price" class="col-lg-2 col-lg-offset-1 control-label">Online price</label>
+                        <div class="col-lg-6">
+                            <input type="number" name="price" id="price" class="form-control" >
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>
 
                     <div class="form-group row">
-                        <label for="description" class="col-lg-2 col-lg-offset-1 control-label">description</label>
+                        <label for="agen_price" class="col-lg-2 col-lg-offset-1 control-label">Agen Price</label>
                         <div class="col-lg-6">
-                            <textarea type="text" name="description" id="description" class="form-control"></textarea>
-                            <span class="help-block with-errors"></span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group row">
-                        <label for="volmetric" class="col-lg-2 col-lg-offset-1 control-label">volmetric</label>
-                        <div class="col-lg-6">
-                            <input type="float" name="volmetric" id="volmetric" class="form-control" required>
-                            <span class="help-block with-errors"></span>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="price" class="col-lg-2 col-lg-offset-1 control-label">price</label>
-                        <div class="col-lg-6">
-                            <input type="number" name="price" id="price" class="form-control" required>
+                            <input type="number" name="agen_price" id="agen_price" class="form-control" >
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>
 
                     <div class="form-group row">
-                        <label for="agen_price" class="col-lg-2 col-lg-offset-1 control-label">agen_price</label>
+                        <label for="reseller_price" class="col-lg-2 col-lg-offset-1 control-label">Reseller Price</label>
                         <div class="col-lg-6">
-                            <input type="number" name="agen_price" id="agen_price" class="form-control" required>
+                            <input type="number" name="reseller_price" id="reseller_price" class="form-control" >
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>
 
                     <div class="form-group row">
-                        <label for="reseller_price" class="col-lg-2 col-lg-offset-1 control-label">reseller_price</label>
+                        <label for="offline_price" class="col-lg-2 col-lg-offset-1 control-label">Offline Price</label>
                         <div class="col-lg-6">
-                            <input type="number" name="reseller_price" id="reseller_price" class="form-control" required>
+                            <input type="number" name="offline_price" id="offline_price" class="form-control" >
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>
 
-                    <div class="form-group row">
-                        <label for="offline_price" class="col-lg-2 col-lg-offset-1 control-label">offline_price</label>
-                        <div class="col-lg-6">
-                            <input type="number" name="offline_price" id="offline_price" class="form-control" required>
-                            <span class="help-block with-errors"></span>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="handling_fee" class="col-lg-2 col-lg-offset-1 control-label">handling_fee</label>
-                        <div class="col-lg-6">
-                            <input type="number" name="handling_fee" id="handling_fee" class="form-control" required>
-                            <span class="help-block with-errors"></span>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
+                    {{-- <div class="form-group row">
                         <label for="stock" class="col-lg-2 col-lg-offset-1 control-label">stock</label>
                         <div class="col-lg-6">
                             <input type="number" name="stock" id="stock" class="form-control" value="0">
                             <span class="help-block with-errors"></span>
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="stock_offline" class="col-lg-2 col-lg-offset-1 control-label">stock_offline</label>
-                        <div class="col-lg-6">
-                            <input type="number" name="stock_offline" id="stock_offline" class="form-control" required value="0">
-                            <span class="help-block with-errors"></span>
-                        </div>
-                    </div>
+                    </div> --}}
+                    
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-sm btn-flat btn-primary"><i class="fa fa-save"></i> Simpan</button>

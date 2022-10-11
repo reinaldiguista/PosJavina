@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Pengeluaran extends Model
+class JobApi extends Model
 {
     use HasFactory;
 
-    protected $table = 'pengeluaran';
-    protected $primaryKey = 'id_pengeluaran';
+    protected $table = 'job_api';
+    protected $primaryKey = 'id';
     protected $guarded = [];
+
 }

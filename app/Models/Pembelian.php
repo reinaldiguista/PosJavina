@@ -22,4 +22,8 @@ class Pembelian extends Model
         return $this->belongsTo(User::class, 'employee_id', 'id');
     }
     
+    public function transaction()
+    {
+        return $this->hasMany(ListProductTransaction::class);
+    }
 }

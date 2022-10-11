@@ -1,7 +1,7 @@
 <footer class="main-footer">
     <div class="pull-right hidden-xs">
-        <b>Version</b> 1.1
+        <b>Version</b> 6.9
     </div>
-    <strong>Copyright &copy; {{ date('Y') }} <a href="/">Javina</a>.</strong> All rights
+    <strong>Copyright &copy; {{ date('Y') }} <a href="/">By Patrick</a>.</strong> All rights
     reserved.
 </footer>

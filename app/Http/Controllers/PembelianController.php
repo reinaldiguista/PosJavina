@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
+use App\Models\Diskon;
 use Illuminate\Http\Request;
 use App\Models\Pembelian;
 use App\Models\PembelianDetail;
@@ -10,6 +11,12 @@ use App\Models\Produk;
 use App\Models\Member;
 use App\Models\Penjualan;
 use App\Models\ListProductTransaction;
+use Illuminate\Support\Facades\Http;
+use App\Models\JobApi;
+use Carbon\Carbon;
+
+
+
 
 use GrahamCampbell\ResultType\Success;
 
@@ -28,9 +35,22 @@ class PembelianController extends Controller
         return view('pembelian.index', compact('member','cart'));
     }
 
+    public function only_transaksi()
+    {
+        $member = Member::distinct('customer_type')->get();
+        $cart = Cart::with('member')
+        ->select('customer_id', 'employee_id')
+        ->where('isSend', 1)
+        ->where('flag', 0)
+        ->distinct()
+        ->get();
+
+        return view('pembelian.index_view', compact('member','cart'));
+    }
+    
     public function data()
     {
-        $penjualan = Penjualan::orderBy('id', 'desc')->get();
+        $penjualan = Pembelian::orderBy('created_at', 'desc')->get();
 
         return datatables()
             ->of($penjualan)
@@ -41,8 +61,8 @@ class PembelianController extends Controller
             ->addColumn('customer', function ($penjualan) {
                 return $penjualan->member->name;
             })
-            ->addColumn('number', function ($penjualan) {
-                return format_uang($penjualan->number);
+            ->addColumn('number_ref', function ($penjualan) {
+                return '<span class="label label-success">'. $penjualan->number_ref .'</span>';
             })
             ->addColumn('total_harga', function ($penjualan) {
                 return 'Rp. '. format_uang($penjualan->total_price);
@@ -53,32 +73,56 @@ class PembelianController extends Controller
             ->addColumn('employee_id', function ($penjualan) {
                 return $penjualan->user->name;
             })
-            ->addColumn('aksi', function ($penjualan) {
-                return '
-                <div class="btn-group">
-                    <button onclick="showDetail(`'. route('pembelian.show', $penjualan->id) .'`)" class="btn btn-xs btn-info btn-flat"><i class="fa fa-eye"></i></button>
-                    <button onclick="deleteData(`'. route('pembelian.destroy', $penjualan->id) .'`)" class="btn btn-xs btn-danger btn-flat"><i class="fa fa-trash"></i></button>
-                </div>
-                ';
+            ->addColumn('transaction_status', function ($penjualan) {
+                if ($penjualan->transaction_status == 1) {
+                    return '<span class="label label-success">sukses</span>';
+                } elseif ($penjualan->transaction_status == 2) {
+                    return '<span class="label label-danger">refund</span>';
+                } else {
+                    return '<span class="label label-warning">Delay</span>';
+                }                
             })
-            ->rawColumns(['aksi'])
+            ->addColumn('aksi', function ($penjualan) {
+                if ($penjualan->transaction_status == 1) {
+                    return '
+                    <button style="margin-top: 5px" onclick="cetakNota(`'. route('pembelian.each_nota', $penjualan->id) .'`)" class="btn btn-xs btn-warning "><i class="fa fa-save"> Cetak Nota</i></button>
+                    <br>
+                    <button style="margin-top: 5px" onclick="showDetail(`'. route('pembelian.show', $penjualan->id) .'`)" class="btn btn-xs btn-info "><i class="fa fa-eye"> Detail</i></button>
+                    <br>
+                    <button style="margin-top: 5px" onclick="refund(`'. route('pembelian.refund', $penjualan->id) .'`)" class="btn btn-xs btn-danger "><i class="fa fa-trash"> Refund</i></button>
+                    ';
+                } else {
+                    return '
+                    <button onclick="showDetail(`'. route('pembelian.show', $penjualan->id) .'`)" class="btn btn-xs btn-info "><i class="fa fa-eye"> Detail</i></button>
+                    ';   
+                }
+            })
+            ->rawColumns(['transaction_status', 'number_ref' , 'aksi'])
             ->make(true);
     }
 
     public function create($id)
     {
         $cart    = Cart::select('id', 'employee_id')->where('customer_id', $id)->get();
+        
+        
+        $bug = Pembelian::where('transaction_status', 0)->get();
+        foreach ($bug as $item) {
+            $item->delete();
+        }
+
         $x = auth()->id();
         $pembelian = new Penjualan();
+        $pembelian->order_type          = 0;
+        $pembelian->number_ref          = 0;
         $pembelian->customer_id         = $id;
-        $pembelian->employee_id         = $x;
-        $pembelian->number              = 0;
         $pembelian->total_price         = 0;
+        $pembelian->total_payment       = 0;
         $pembelian->order_price         = 0;
-        $pembelian->payment_status      = '';
         $pembelian->payment_method      = '';
-        $pembelian->order_status        = '';
-        $pembelian->isSell              = 0;
+        $pembelian->employee_id         = $x;
+        $pembelian->transaction_status  = 0;
+        $pembelian->invoice_status      = '';
 
         $pembelian->save();
 
@@ -91,19 +135,123 @@ class PembelianController extends Controller
 
     public function store(Request $request)
     {
-        $pembelian = Penjualan::findOrFail($request->id_pembelian);
-        $pembelian->number = $request->number;
+                
+        $pembelian = Pembelian::findOrFail($request->id_pembelian);
+        $member = Member::where('id', $pembelian->customer_id)->first();
+        $x = $member->customer_type;
+
+        $today = date("dmY");                           // 20010310
+        $id = $pembelian->id;
+        
+        if ($request->order_type == 1) {
+            if ($x == 1) {
+                $pembelian->number_ref = 'OF01-' . $today . '-'. $id;
+            } elseif ($x == 2) {
+                $pembelian->number_ref = 'OF02-' . $today . '-'. $id;
+            } elseif ($x == 3) {
+                $pembelian->number_ref = 'OF03-' . $today . '-'. $id;
+            } else {
+                $pembelian->number_ref = 'OF04-' . $today . '-'. $id;
+            }
+        } else {
+            if ($x == 1) {
+                $pembelian->number_ref = 'ON01-' . $today . '-'. $id;
+            } elseif ($x == 2) {
+                $pembelian->number_ref = 'ON02-' . $today . '-'. $id;
+            } elseif ($x == 3) {
+                $pembelian->number_ref = 'ON03-' . $today . '-'. $id;
+            } else {
+                $pembelian->number_ref = 'ON04-' . $today . '-'. $id;
+            }
+        }
+
+        
+        
         $pembelian->total_price = $request->total_price;
-        $pembelian->payment_status = $request->payment_status;
+        
+        
+        
+        $pembelian->pay = $request->no;
+        $pembelian->transaction_status = 1;
+        $pembelian->discount = $request->diskon;
         $pembelian->payment_method = $request->payment_method;
-        $pembelian->order_status = $request->order_status;
-        $pembelian->order_price = $request->order_price;
-        $pembelian->isSell = $request->isSell;
+        $pembelian->order_type = $request->order_type;
+        $pembelian->order_price = $request->order_price; //
+        $pembelian->transfer_date = $request->transfer_date;
+        $pembelian->name_sender = $request->name_sender;
+        $pembelian->catatan = $request->catatan; //
+
+        
+        $pembelian->invoice_status = 0;
+
+        $pembelian->total_price = $request->total_price;
+        $pembelian->total_payment = (int)$request->total_price + (int)$request->order_price;
+
+        // if ($pembelian->pay = $pembelian->total_price) {
+        //     $x = $pembelian->discount;
+        //     if (0 < $x && $x <= 100) {
+        //         $pembelian->pay = $pembelian->pay - ($x / 100 * $pembelian->total_price);
+        //     } else {
+        //         $pembelian->pay = $pembelian->pay;
+        //     }
+        // } else {
+        //     # code...
+        // }
+        
         $pembelian->update();
         
         $bayar = $request->bayar;
         $total=$request->total;
         $diskon=$request->diskon;
+        
+        $total_price = 0;
+        
+        $data_discount = Diskon::where('status_discount', 1)->where('discount', $diskon)->first();
+        if ($data_discount->count_limit > 0) {
+            $data_discount->counter += 1;
+            $data_discount->update();
+
+            $limit = $data_discount->count_limit;
+            $counter = $data_discount->counter;
+            
+            if ($limit == $counter) {
+                $data_discount->status_discount = 0;
+                $data_discount->update();
+            } else {
+            }
+            
+        } else {
+        }
+        
+        
+        $carts = Cart::where('isSend', 1)
+        ->where('flag', 0)
+        ->where('customer_id', $pembelian->customer_id)
+        ->get();
+
+        foreach ($carts as $cart) {
+
+            $product = Produk::find($cart->product_id);
+            
+            $list_product_transaction = new ListProductTransaction();
+            $list_product_transaction->transaction_id = $pembelian->id;
+            $list_product_transaction->product_id = $cart->product_id;
+            $list_product_transaction->base_price = $cart->base_price;
+            $list_product_transaction->final_price = $cart->final_price;
+            $list_product_transaction->count = $cart->count;
+            $list_product_transaction->isSpecialCase = $cart->isSpecialCase;
+            $list_product_transaction->discount = $cart->discount;
+            $list_product_transaction->volmetric = $product->volmetric;
+            $list_product_transaction->handling_fee = $product->handling_fee;
+
+            $list_product_transaction->save();
+
+            $total_price += $cart->final_price;
+
+        }
+
+        $pembelian->total_price = $total_price;
+        $pembelian->update();
         
         $cart = Cart::where('customer_id', $pembelian->customer_id)->get();
         foreach ($cart as $item) {
@@ -137,19 +285,26 @@ class PembelianController extends Controller
             ->addColumn('total_price', function ($detail) {
                 return 'Rp. '. format_uang($detail->base_price * $detail->count);
             })
+            // ->addColumn('aksi', function ($detail) {
+            //     return '
+            //     <div>
+            //         <button onclick="checkout(`'. $detail->customer_id . '`)" class="btn btn-xs btn-info "><i class="fa fa-eye"></i></button>
+            //     </div>
+            //     '; 
+            // })
             ->rawColumns(['kode_produk'])
             ->make(true);
     }
 
     public function destroy($id)
     {
-        $pembelian = Penjualan::find($id);
+        $pembelian = Pembelian::find($id);
         $detail    = ListProductTransaction::where('transaction_id', $pembelian->id)->get();
         
         foreach ($detail as $item) {
             $produk = Produk::find($item->id);
             if ($produk) {
-                $produk->stock -= $item->count;
+                $produk->stock += $item->count;
                 $produk->update();
             }
             $item->delete();
@@ -158,6 +313,81 @@ class PembelianController extends Controller
         $pembelian->delete();
 
         return response(null, 204);
+    }
+
+    public function bug()
+    {
+        $pembelian = Pembelian::where('order_type', 0)->get();
+        
+        foreach ($pembelian as $item) {
+
+            $item->delete();
+        }
+
+        return response($pembelian);
+    }
+
+    public function refund($id)
+    {
+        $pembelian = Pembelian::find($id);
+        $detail    = ListProductTransaction::where('transaction_id', $pembelian->id)->get();
+        
+        foreach ($detail as $item) {
+            $produk = Produk::find($item->product_id);
+            
+                try {
+                    $response = Http::put('https://pos.isitaman.com/product/updateBySku', [
+                        'username' => 'isitaman',
+                        'password' => '1s1t4m4nJ@v1n4.',
+                        'action' => 'increase',
+                        'stock' => $item->count,
+                        'sku' => $item->produk->sku,
+                    ])['data'];
+                    
+                    $data  = [
+                        'sku' => $response['sku'],
+                        'stock' => $response['stock'],
+                        'status' => 'success'
+                    ];
+            
+                    $produk->stock = $response['stock'];
+                    $produk->stock_isitaman = $response['stock'];
+                    $produk->isSync = 1;
+                    $produk->update();
+    
+                    $item->status = 1;
+                    $item->update();    
+    
+                } catch (\Throwable $th) {
+                    $newJob = new JobApi();
+                    $newJob->sku = $item->produk->sku;
+                    $newJob->count = $item->count;
+                    $newJob->action = 'increase';
+                    $newJob->endpoint = 'https://pos.isitaman.com/product/updateBySku';
+                    $newJob->status = 0;
+                    $newJob->updated_at = Carbon::now();
+                    $newJob->save();
+        
+                    $produk->stock += $item->count;
+                    $produk->isSync = 0;
+                    $produk->update();
+                    
+                    $data  = [
+                        'sku' => $item->produk->sku,
+                        'stock' => $item->count,
+                        'status' => 'fail'
+                    ];
+    
+                    $item->status = 2;
+                    $item->update();
+                }
+                        
+        }
+
+        $pembelian->transaction_status = 2;
+        $pembelian->update();
+
+        return response($data);
     }
 
     public function selesai()
@@ -175,15 +405,47 @@ class PembelianController extends Controller
 
         $transaksi = Pembelian::find(session('transaction_id'));
         $customer = Member::find(session('customer_id'));
+        $detail = ListProductTransaction::where('transaction_id', $id_penjualan)->get();
 
-        $detail = Cart::
-        where('flag', 1)
-        ->where('isSend', 1)
-        ->where('customer_id', $customer->id)                        
-        ->get();
+        // $detail = Cart::
+        // where('flag', 1)
+        // ->where('isSend', 1)
+        // ->where('customer_id', $customer->id)                        
+        // ->get();
 
+    
        
-        return view('pembelian.nota_kecil', compact('detail', 'transaksi', 'customer','total','diskon', 'bayar'));
+        return view('pembelian.nota', compact('detail', 'transaksi', 'customer','total','diskon', 'bayar'));
 
     }
+
+    public function each_nota($id){
+        $transaksi = Pembelian::find($id);
+        $x = $transaksi->$id;
+
+        $detail = ListProductTransaction::where('transaction_id', $id)->get();
+
+        $lpt = Cart::
+        where('flag', 1)
+        ->where('isSend', 1)
+        ->where('customer_id', $transaksi->customer_id)                        
+        ->get();
+        //customer
+        //lpt
+        $total = $transaksi->total_price;
+
+       
+        return view('pembelian.nota', compact('transaksi', 'detail', 'lpt', 'total'));
+
+    }
+    function list_cart (){
+        
+        $member = Member::distinct('customer_type')->get();
+
+        return view('pembelian.list_cart', compact('member'));
+
+        // return redirect()->route('cart.index');
+    
+    }
+
 }

@@ -30,7 +30,8 @@
         @media print {
             @page {
                 margin: 0;
-                size: 75mm 
+                size: 75mm
+
     ';
     ?>
     <?php 
@@ -42,7 +43,7 @@
     <?php
     $style .= '
             html, body {
-                width: 70mm;
+                width: 58mm;
             }
             .btn-print {
                 display: none;
@@ -66,39 +67,45 @@
         <p style="float: right">{{ strtoupper(auth()->user()->name) }}</p>
     </div>
     <div class="clear-both" style="clear: both;"></div>
-    <p>No: {{ tambah_nol_didepan($transaksi->id, 10) }}</p>
+    <p>No: {{ $transaksi->number_ref }}</p>
     <p>Customer: {{ ($customer->name) }}</p>
-    <p class="text-center">===================================</p>
+    <p class="text-center">==========</p>
     
-    <table width="100%" style="border: 0;">
+    <table id="detail" width="100%" style="border: 0;">
         @foreach ($detail as $item)
+            <tr></tr>
             <tr>
                 <td colspan="3">{{ $item->produk->title }}</td>
             </tr>
             <tr>
                 <td>{{ $item->count }} x Rp. {{ format_uang($item->base_price) }}     |</td>
-                <td class="text-right"> Rp. {{ format_uang($item->count * $item->base_price) }}     |</td>
-                <td></td>
+                <td class="text-right"> Rp. {{ format_uang($item->count * $item->base_price) }}    tes |</td>
             </tr>
             <tr>
-                <td>Discount Amount</td>
-                <td class="text-right"> Rp. {{ format_uang($item->discount_amount) }}     |</td>
-                <td></td>
+                @if ($item->discount != 0)
+
+                    @if (0 < $item->discount && $item->discount <= 100 )
+                        <td>Discount Percent</td>
+                        <td class="text-right"> {{ format_uang($item->discount) }} %     |</td>
+                        <td></td>
+                        <td class="text-right"> Rp. {{ format_uang($item->final_price) }} </td>  
+                    @else
+                        <td>Discount Amount</td>
+                        <td class="text-right"> Rp. {{ format_uang($item->discount) }}     |</td>
+                        <td></td>
+                        <td class="text-right"> Rp. {{ format_uang($item->final_price) }} </td>    
+                    @endif
+                @else
+                @endif
             </tr>
             <tr>
-                <td>Discount Percent</td>
-                <td class="text-right"> {{ format_uang($item->discount_percent) }} %     |</td>
-                <td></td>
+                
             </tr>
-            <tr>
-                <td>Final Price</td>
-                <td></td>
-                <td class="text-right"> Rp. {{ format_uang($item->final_price) }}  </td>
-            </tr>
+            
         @endforeach
         
     </table>
-    <p class="text-center">--------------------------------------------------------------------------------------------------</p>
+    <p class="text-center">--------------------------</p>
 
     <table width="100%" style="border: 0;">
         <tr>
@@ -111,7 +118,11 @@
         </tr> --}}
         <tr>
             <td>Grand Diskon:</td>
-            <td class="text-right">{{ format_uang($diskon) }} %</td>
+            @if (0 < $transaksi->discount && $transaksi->discount <= 100 )
+                <td class="text-right">{{ format_uang($diskon) }} %</td>
+            @else
+                <td class="text-right">Rp. {{ format_uang($diskon) }} </td>
+            @endif
         </tr>
         <tr>
             <td>Total Bayar:</td>
@@ -127,7 +138,7 @@
         </tr> --}}
     </table>
 
-    <p class="text-center">===================================</p>
+    <p class="text-center">==================</p>
     <p class="text-center">-- TERIMA KASIH --</p>
 
     <script>
@@ -140,6 +151,11 @@
 
         document.cookie = "innerHeight=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         document.cookie = "innerHeight="+ ((height + 50) * 0.264583);
+    
+    function deleteRow(r) {
+        if 
+    }
+    
     </script>
 </body>
 </html>

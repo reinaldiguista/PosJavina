@@ -15,7 +15,12 @@
                         <th>Jumlah</th>
                         <th>Total</th>
                     </thead>
+                    <tbody>
+                        
+                    </tbody>
                 </table>
+            </div>
+            <div class="modal-footer">  
             </div>
         </div>
     </div>

@@ -34,6 +34,7 @@
     document.cookie = "innerHeight=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     
     function notaKecil(url) {
+        console.log(url);
         popupCenter(url, 625, 500);
     }
 

@@ -20,6 +20,13 @@
     <link rel="stylesheet" href="{{ asset('/AdminLTE-2/dist/css/skins/_all-skins.min.css') }}">
     <!-- DataTables -->
     <link rel="stylesheet" href="{{ asset('/AdminLTE-2/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css') }}">
+    <script src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap4.min.js"></script>
+    <link rel="https://cdn.datatables.net/rowgroup/1.1.1/css/rowGroup.bootstrap4.min.css" />
+    
+    <link rel="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha1/dist/css/bootstrap.min.css" />
+    <link rel="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha1/dist/js/bootstrap.bundle.min.js" />
+    <link rel="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" />
+    <link rel="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -34,7 +41,7 @@
 
     @stack('css')
 </head>
-<body class="hold-transition skin-purple-light sidebar-mini">
+<body onload="cek_sync()" class="hold-transition skin-purple-light sidebar-mini">
     <div class="wrapper">
 
         @includeIf('layouts.header')
@@ -83,11 +90,35 @@
     <script src="{{ asset('AdminLTE-2/dist/js/adminlte.min.js') }}"></script>
     <!-- Validator -->
     <script src="{{ asset('js/validator.min.js') }}"></script>
-
+    <script src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap4.min.js"></script>
     <script>
         function preview(selector, temporaryFile, width = 200)  {
             $(selector).empty();
             $(selector).append(`<img src="${window.URL.createObjectURL(temporaryFile)}" width="${width}">`);
+        }
+    </script>
+
+    <script>
+        function cek_sync() {
+        document.getElementById('times').style.display = "none";
+        document.getElementById('check').style.display = "none";
+            $.get(`{{ url('/job_api/cek_sync') }}`, {
+                    // '_token': $('[name=csrf-token]').attr('content'),
+                    '_method': 'get'
+                })
+                .done(response => {
+                    if (response.status == 'success') {
+                        document.getElementById('times').style.display = "none";
+                        document.getElementById('check').style.display = "block";
+                        window.location.reload();
+                    } else {
+                        document.getElementById('times').style.display = "block";
+                        document.getElementById('check').style.display = "none";
+                    }
+                    table.ajax.reload();    
+                })
+                .fail(errors => {
+                });
         }
     </script>
     @stack('scripts')

@@ -14,7 +14,8 @@
     <div class="col-lg-12">
         <div class="box">
             <div class="box-header with-border">
-                <button onclick="addForm()" class="btn btn-success btn-xs btn-flat"><i class="fa fa-plus-circle"></i> Transaksi Baru</button>
+                <button onclick="addForm()" class="btn btn-info btn-lg btn-block"><i class="fa fa-plus-circle"></i> Proses Transaksi</button>
+                <button onclick="addCustomer()" class="btn btn-success btn-lg btn-block"><i class="fa fa-cart-plus"></i> Buat Transaksi</button>
                 @empty(! session('id_pembelian'))
                 <a href="{{ route('pembelian_detail.index') }}" class="btn btn-info btn-xs btn-flat"><i class="fa fa-pencil"></i> Transaksi Aktif</a>
                 @endempty
@@ -25,10 +26,11 @@
                         <th width="5%">No</th>
                         <th>Tanggal</th>
                         <th>Customer</th>
-                        <th>Number</th>
+                        <th>Nomor Nota</th>
                         <th>Total Harga</th>
                         <th>Payment Method</th>
                         <th>Employee</th>
+                        <th>Status Transaksi</th>
                         <th width="15%"><i class="fa fa-cog"></i></th>
                     </thead>
                 </table>
@@ -39,6 +41,7 @@
 
 @includeIf('pembelian.cart')
 @includeIf('pembelian.detail')
+@includeIf('pembelian.customer')
 @endsection
 
 @push('scripts')
@@ -58,15 +61,18 @@
                 {data: 'DT_RowIndex', searchable: false, sortable: false},
                 {data: 'tanggal'},
                 {data: 'customer'},
-                {data: 'number'},
+                {data: 'number_ref'},
                 {data: 'total_harga'},
                 {data: 'payment_method'},
                 {data: 'employee_id'},
+                {data: 'transaction_status'},
                 {data: 'aksi', searchable: false, sortable: false},
             ]
         });
 
         $('.table-cart').DataTable();
+        $('.table-customer').DataTable();
+        
         table1 = $('.table-detail').DataTable({
             processing: true,
             bSort: false,
@@ -85,7 +91,18 @@
         $('#modal-cart').modal('show');
     }
 
+    function addCustomer() {
+        $('#modal-customer').modal('show');
+    }
+
     function showDetail(url) {
+        $('#modal-detail').modal('show');
+
+        table1.ajax.url(url);
+        table1.ajax.reload();
+    }
+
+    function cetakNota(url) {
         $('#modal-detail').modal('show');
 
         table1.ajax.url(url);
@@ -99,11 +116,64 @@
                     '_method': 'delete'
                 })
                 .done((response) => {
-                    table.ajax.reload();
+                    table1.ajax.reload();
                 })
                 .fail((errors) => {
                     alert('Tidak dapat menghapus data');
-                    return;
+                    table1.ajax.reload();
+                });
+        }
+    }
+
+    function cetakNota(url) {
+        console.log(url);
+        popupCenter(url, 625, 500);
+    }
+
+    function popupCenter(url, title, w, h) {
+        const dualScreenLeft = window.screenLeft !==  undefined ? window.screenLeft : window.screenX;
+        const dualScreenTop  = window.screenTop  !==  undefined ? window.screenTop  : window.screenY;
+
+        const width  = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+        const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+        const systemZoom = width / window.screen.availWidth;
+        const left       = (width - w) / 2 / systemZoom + dualScreenLeft
+        const top        = (height - h) / 2 / systemZoom + dualScreenTop
+        const newWindow  = window.open(url, title, 
+        `
+            scrollbars=yes,
+            width  = ${w / systemZoom}, 
+            height = ${h / systemZoom}, 
+            top    = ${top}, 
+            left   = ${left}
+        `
+        );
+
+        if (window.focus) newWindow.focus();
+    }
+
+    function refund(url) {
+        if (confirm('Yakin ingin refund transaksi terpilih?')) {
+            
+            $.get(url, {
+                    '_token': $('[name=csrf-token]').attr('content'),
+                    '_method': 'get',
+                })
+                .done(response => {
+                    console.log(response.status);
+                    if (response.status == 'success') {
+                        alert('Transaksi berhasil refund');
+                        table.ajax.reload();                    
+                    } else {
+                        alert('data berhasil terhapus dari local, namun belum sinkron');
+                        table.ajax.reload();                    
+                    }                 
+                })
+                .fail(errors => {
+                    console.log(respones.status);
+                    alert('data berhasil terhapus dari local, namun belum sinkron');
+                    table.ajax.reload();                    
                 });
         }
     }

@@ -14,16 +14,14 @@
     <div class="col-lg-12">
         <div class="box">
             <div class="box-header with-border">
-                <button onclick="addForm('{{ route('member.store') }}')" class="btn btn-success btn-xs btn-flat"><i class="fa fa-plus-circle"></i> Tambah</button>
+                <button onclick="addForm('{{ route('member.store') }}')" class="btn btn-success btn-lg btn-block"><i class="fa fa-plus-circle"></i> Tambah</button>
             </div>
             <div class="box-body table-responsive">
                 <form action="" method="post" class="form-member">
                     @csrf
                     <table class="table table-stiped table-bordered">
                         <thead>
-                            <th width="5%">
-                                <input type="checkbox" name="select_all" id="select_all">
-                            </th>
+                            
                             <th width="5%">No</th>
                             <th>Name</th>
                             <th>Phone</th>
@@ -54,7 +52,6 @@
                 url: '{{ route('member.data') }}',
             },
             columns: [
-                {data: 'select_all', searchable: false, sortable: false},
                 {data: 'DT_RowIndex', searchable: false, sortable: false},
                 {data: 'name'},
                 {data: 'phone'},

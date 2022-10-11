@@ -20,11 +20,20 @@ class UserController extends Controller
         return datatables()
             ->of($user)
             ->addIndexColumn()
+            ->addColumn('level', function ($user) {
+                if ($user->level == 2) {
+                    return "Supervisor";
+                } elseif ($user->level == 3) {
+                    return "Kasir";
+                } else {
+                    return "Pendamping";
+                }
+            })
             ->addColumn('aksi', function ($user) {
                 return '
                 <div class="btn-group">
-                    <button type="button" onclick="editForm(`'. route('user.update', $user->id) .'`)" class="btn btn-xs btn-info btn-flat"><i class="fa fa-pencil"></i></button>
-                    <button type="button" onclick="deleteData(`'. route('user.destroy', $user->id) .'`)" class="btn btn-xs btn-danger btn-flat"><i class="fa fa-trash"></i></button>
+                    <button type="button" onclick="editForm(`'. route('user.update', $user->id) .'`)" class="btn btn-xs btn-info "><i class="fa fa-pencil"></i></button>
+                    <button type="button" onclick="deleteData(`'. route('user.destroy', $user->id) .'`)" class="btn btn-xs btn-danger "><i class="fa fa-trash"></i></button>
                 </div>
                 ';
             })
@@ -97,6 +106,7 @@ class UserController extends Controller
         $user = User::find($id);
         $user->name = $request->name;
         $user->email = $request->email;
+        $user->level = $request->level;
         if ($request->has('password') && $request->password != "") 
             $user->password = bcrypt($request->password);
         $user->update();

@@ -26,6 +26,16 @@
                         </div>
                     </div>
                     <div class="form-group row">
+                        <label for="email" class="col-lg-3 col-lg-offset-1 control-label">Role</label>
+                        <div class="col-lg-6">
+                            <select name="level" id="level" class="form-control">
+                                <option value=2>Supervisor</option>
+                                <option value=3>Kasir</option>
+                                <option value=4>Pendamping</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
                         <label for="password" class="col-lg-3 col-lg-offset-1 control-label">Password</label>
                         <div class="col-lg-6">
                             <input type="password" name="password" id="password" class="form-control" 

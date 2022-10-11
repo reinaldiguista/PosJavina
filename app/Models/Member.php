@@ -23,5 +23,13 @@ class Member extends Model
         return $this->hasMany(Penjualan::class);
     }
 
-    
+    public function type()
+    {
+        return $this->belongsTo(CustomerType::class, 'customer_type', 'id');
+    }
+
+    public function invoice()
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Member;
+use App\Models\CustomerType;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use PDF;
@@ -16,7 +17,9 @@ class MemberController extends Controller
      */
     public function index()
     {
-        return view('member.index');
+        $customerType = CustomerType::all();
+        
+        return view('member.index', compact('customerType'));
     }
 
     public function data()
@@ -38,13 +41,13 @@ class MemberController extends Controller
                 return $member->phone ;
             })
             ->addColumn('customer_type', function ($member) {
-                return $member->customer_type ;
+                return $member->type->role ;
             })
             ->addColumn('aksi', function ($member) {
                 return '
                 <div class="btn-group">
-                    <button type="button" onclick="editForm(`'. route('member.update', $member->id) .'`)" class="btn btn-xs btn-info btn-flat"><i class="fa fa-pencil"></i></button>
-                    <button type="button" onclick="deleteData(`'. route('member.destroy', $member->id) .'`)" class="btn btn-xs btn-danger btn-flat"><i class="fa fa-trash"></i></button>
+                    <button type="button" onclick="editForm(`'. route('member.update', $member->id) .'`)" class="btn btn-xs btn-info "><i class="fa fa-pencil"></i>Edit Member</button>
+                    <button type="button" onclick="deleteData(`'. route('member.destroy', $member->id) .'`)" class="btn btn-xs btn-danger "><i class="fa fa-trash"></i>Hapus Member</button>
                 </div>
                 ';
             })

@@ -20,7 +20,7 @@ class PenjualanController extends Controller
     {
         $penjualan = Penjualan::with('member')
         ->orderBy('id', 'desc')
-        ->where('payment_status', 1)
+        ->where('transaction_status', 1)
         ->get();
             // dd ($penjualan);
         return datatables()
@@ -60,7 +60,7 @@ class PenjualanController extends Controller
     {
         $penjualan = new Penjualan();
         $penjualan->customer_id = $id;
-        $penjualan->number = 0;
+        $penjualan->number_ref = 0;
         $penjualan->order_price = 0;
         $penjualan->order_status = "offline";
         $penjualan->employee_id = auth()->id();
@@ -157,6 +157,7 @@ class PenjualanController extends Controller
         if (! $penjualan) {
             abort(404);
         }
+
         $detail = PenjualanDetail::with('produk')
             ->where('id_penjualan', session('id_penjualan'))
             ->get();
