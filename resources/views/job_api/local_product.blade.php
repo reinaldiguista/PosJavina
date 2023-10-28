@@ -17,8 +17,9 @@
                 
                 <button style="float: left" onclick="view_local()" class="btn btn-warning  btn-round"><i class="fa fa-cubes"></i> Show Local</button>
                 <button style="float: left; margin-left: 5px" onclick="view_online()" class="btn btn-warning  btn-round"><i class="fa fa-cubes"></i> Show isitaman</button>
-                <button style="float: right; margin-left: 5px" onclick="sync_stock()" class="btn btn-success  btn-round"><i class="fa fa-handshake-o"></i> Sync Stock</button>
-                <button style="float: right" onclick="cek()" class="btn btn-info  btn-round"><i class="fa fa-database"></i> Cek IsiTaman</button>
+                <button style="float: right; margin-left: 5px" onclick="sync_stock()" class="btn btn-success  btn-round"><i class="fa fa-handshake-o"></i> Sync Stock All</button>
+                <button style="float: right; margin-left: 5px" onclick="replace()" class="btn btn-info  btn-round"><i class="fa fa-files-o"></i> Replace Stock All</button>
+                <button style="float: right" onclick="cek()" class="btn btn-warning  btn-round"><i class="fa fa-database"></i> Check All</button>
             </div>
             <div class="box-body table-responsive" id="local">
                 <form action="" method="post" class="form-member">
@@ -130,23 +131,28 @@
                 if (response.status == "sukses_cek") {
                     alert('sukses cek data isiTaman');
                     table.ajax.reload();
+                    table2.ajax.reload();
                 } else if (response.status == "sukses_update") {
                     alert('sukses update stok dari isiTaman');
                     table.ajax.reload();
+                    table2.ajax.reload();
                 } else if (response.status == "fail_produk") {
                     alert('gagal cek data ke isiTaman, Produk tidak ditemukan');
                     table.ajax.reload();
+                    table2.ajax.reload();
                 } else if (response.status == "not_sync") {
                     alert('Data produk belum sinkron, cek halaman sinkronisasi terlebih dahulu');
                     table.ajax.reload();
+                    table2.ajax.reload();
                 } else if (response.status == "fail_connect") {
                     alert('Gagal terhubung dengan isi taman');
                     table.ajax.reload();
+                    table2.ajax.reload();
                 }
                 else {
-                
+                    table.ajax.reload();
+                    table2.ajax.reload();
                 }
-
             })
             .fail((errors) => {
                 alert('Tidak dapat menampilkan data');
@@ -161,7 +167,8 @@
                 })
                 .done(response => {
                     alert('sukses');
-                    table.ajax.reload();                    
+                    table.ajax.reload();
+                    table2.ajax.reload();                    
                 })
                 .fail(errors => {
                     alert('fail');
@@ -174,8 +181,21 @@
                     '_method': 'get'
                 })
                 .done(response => {
-                    
-                    table.ajax.reload();                    
+                    table.ajax.reload(); 
+                    table2.ajax.reload();                   
+                })
+                .fail(errors => {
+                });
+    }
+
+    function replace() {
+        $.get(`{{ url('/job_api/replace') }}`, {
+                    '_token': $('[name=csrf-token]').attr('content'),
+                    '_method': 'get'
+                })
+                .done(response => {
+                    table.ajax.reload(); 
+                    table2.ajax.reload();                   
                 })
                 .fail(errors => {
                 });
@@ -190,16 +210,20 @@
                 .done(response => {
                     if (response.status == "not_upload") {    
                         alert('Data Belum diupload di Isiaman');
-                        table.ajax.reload();                    
+                        table.ajax.reload();     
+                        table2.ajax.reload();               
                     } else if (response.status == "not_sync") {
                         alert('Data belum sinkron, ada di tabel job');
-                        table.ajax.reload();                    
+                        table.ajax.reload();  
+                        table2.ajax.reload();                  
                     } else if (response.status == "sukses") {
                         alert('Sukses sinkron stok');
-                        table.ajax.reload();                    
+                        table.ajax.reload();  
+                        table2.ajax.reload();                  
                     } else {
                         alert('Terjadi kesalahan server');
-                        table.ajax.reload();                    
+                        table.ajax.reload();
+                        table2.ajax.reload();                    
                     }
                 })
                 .fail(errors => {

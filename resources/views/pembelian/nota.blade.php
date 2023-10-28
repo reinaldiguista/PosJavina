@@ -59,8 +59,6 @@
 <body onload="window.print()">
     <button class="btn-print" style="position: absolute; right: 1rem; top: rem;" onclick="window.print()">Print</button>
     <div class="text-center">
-        <img src="{{ asset('img/kiri.jpg') }}" alt="description of myimage" style="height: 100px; width:120px ; float: left">
-        <img src="{{ asset('img/kanan.jpg') }}" alt="description of myimage" style="height: 100px; width:120px; float: right">
         <h3 style="margin-bottom: 5px;">Taman Arjuno</h3>
         <p>Kreweh, Gunungrejo, Singosari, Malang <br> 0812-3463-5035</p>
     </div>
@@ -68,19 +66,19 @@
     <div>
         <p style="float: left"> Tanggal 
         <br>    No. Ref. <br> Nama Kasir <br> Nama Customer </p>
-        <p style="float: right; text-align:right" > {{ date('d-m-Y') }}
+        <p style="float: right; text-align:right" > {{ tanggal_indonesia($transaksi->created_at, false) }}
         <br>  {{ $transaksi->number_ref }} <br> {{ strtoupper(auth()->user()->name) }} <br> {{ ($transaksi->member->name) }} <br></p>
     </div>
     
     
     <div>
-        <p style="text-align: center">---------------------------------</p>
+        {{-- <p style="text-align: center">---------------------------------</p> --}}
     </div>
     <table id="detail" width="100%" style="border: 0;">
         @foreach ($detail as $item)
             <tr></tr>
             <tr>
-                <td colspan="4">{{ $item->produk->title }}</td>
+                <td colspan="4">{{ $item->produk->nama_produk }}</td>
             </tr>
             <tr>
                 
@@ -144,6 +142,13 @@
         
     </table>
     <p style="text-align: center">---------------------------------</p>
+
+    @if ($transaksi->payment_method == "Invoice")
+    <p style="text-align: center">---INVOICE---</p>
+
+    @else
+
+    @endif
 
     <table width="100%" style="border: 0;">
         <tr>

@@ -22,8 +22,8 @@
                     <div id="stock" style="float: right" class="col-lg-8">
                         <input style="align-content: flex-end" type="text" id="stock_produk" name="stock_produk" class="form-control" readonly>
                         <br>
-                        <button name="sukses" id="sukses" style="display: none" class="btn btn-success btn-sm fa fa-check-circle-o"> success</button>
-                        <button name="gagal" id="gagal" style="display: none" class="btn btn-danger btn-sm fa fa-times-circle-o"> failed</button>
+                        <button name="sukses" id="sukses" style="display: none" class="btn btn-success btn-sm fa fa-check-circle-o"> isitaman</button>
+                        <button name="gagal" id="gagal" style="display: none" class="btn btn-danger btn-sm fa fa-times-circle-o"> local</button>
                     </div>
                 </div>
                 <div class="form-group row">
@@ -49,13 +49,19 @@
                 @foreach ($produk as $key => $item)
                                   
             @endforeach --}}
+            <a style="margin-bottom: 5px" href="#" class="btn btn-info btn-block btn-flat"
+                            onclick="kirimProduk()">
+                            <i class="fa fa-arrow-up"></i>
+                            Tambah Stok
+                        </a> 
             <button type="button" class="btn btn-danger" data-dismiss="modal">Batal</button>
                         
-                        <a href="#" class="btn btn-success btn-flat"
+                        <a href="#" class="btn btn-success "
                             onclick="pilihProduk()">
-                            <i class="fa fa-arrow-down"></i>
+                            {{-- <i class="fa fa-arrow-down"></i> --}}
                             Beli
                         </a>  
+                        
             </div>
         </div>
     </div>

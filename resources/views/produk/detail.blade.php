@@ -9,17 +9,37 @@
 
             <form>
             <div class="form-group">
-              <label for="kategori"  class="control-label">Kategori:</label>
-              <input type="text" class="form-control" name="kategori" id="kategori"> 
+              <label for="jenis_produk"  class="control-label">Jenis Produk :</label>
+              <input type="text" class="form-control" name="jenis_produk" id="jenis_produk"> 
             </div>
             <div class="form-group">
-                <label for="nomor_meja" class="control-label">Volmetric:</label>
-                <input type="text" class="form-control" name="volmetric" id="volmteric"> 
-              </div>
-            <div class="form-group">
-              <label for="desc"  class="control-label">Deskripsi:</label>
-              <textarea class="form-control" name="desc" id="desc"></textarea> 
+                <label for="kondisi" class="control-label">Kondisi :</label>
+                <input type="text" class="form-control" name="kondisi" id="kondisi"> 
             </div>
+            <div class="form-group">
+              <label for="genus" class="control-label">Genus :</label>
+              <input type="text" class="form-control" name="genus" id="genus"> 
+            </div>
+            <div class="form-group">
+              <label for="supplier" class="control-label">Supplier :</label>
+              <input type="text" class="form-control" name="supplier" id="supplier"> 
+            </div>
+            <div class="form-group">
+              <label for="registrasi_anggrek" class="control-label">Regist :</label>
+              <input type="text" class="form-control" name="registrasi_anggrek" id="registrasi_anggrek"> 
+            </div>
+            <div class="form-group">
+              <label for="grade" class="control-label">Grade :</label>
+              <input type="text" class="form-control" name="grade" id="grade"> 
+            </div>
+            <div class="form-group">
+              <label for="hb_sp" class="control-label">HB / SP :</label>
+              <input type="text" class="form-control" name="hb_sp" id="hb_sp"> 
+            </div>
+            {{-- <div class="form-group">
+              <label for="genus"  class="control-label">Genus :</label>
+              <textarea class="form-control" name="genus" id="genus"></textarea> 
+            </div> --}}
           </form>
 
         </div>

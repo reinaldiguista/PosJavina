@@ -6,6 +6,21 @@
 
 @push('css')
 <style>
+        /* Create three equal columns that floats next to each other */
+.column {
+  float: left;
+  margin-left: 10px;
+  width: 10%;
+  padding: 5px;
+  /* height: 300px; Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
     .switch {
   position: relative;
   display: inline-block;
@@ -48,11 +63,11 @@
 }
 
 input:checked + .slider {
-  background-color: #2196F3;
+  background-color: #1cc01c;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
+  box-shadow: 0 0 1px #1cc01c;
 }
 
 input:checked + .slider:before {
@@ -112,28 +127,32 @@ input:checked + .slider:before {
 	}
     
     
-    .tampil-bayar {
+    /* .tampil-bayar {
         font-size: 5em;
         text-align: center;
         height: 100px;
-    }
+    } */
 
     .tampil-terbilang {
         padding: 10px;
-        background: #f0f0f0;
+        background: #5db6df;
+    }
+    .tampil-terbilang_kembali {
+        padding: 10px;
+        background: #5db6df;
     }
 
     .table-penjualan tbody tr:last-child {
         display: none;
     }
 
-    @media(max-width: 768px) {
+    /* @media(max-width: 768px) {
         .tampil-bayar {
             font-size: 3em;
             height: 70px;
             padding-top: 5px;
         }
-    }
+    } */
 </style>
 @endpush
 
@@ -150,11 +169,15 @@ input:checked + .slider:before {
             <div class="box-header with-border">
                 <table>
                     <tr>
-                        <td>Nama Customer</td>
+                        <td>Nomor Nota </td>
+                        <td> : {{ $nomor_nota }}</td>
+                    </tr>
+                    <tr>
+                        <td>Customer </td>
                         <td> : {{ $customer->name }}</td>
                     </tr>
                     <tr>
-                        <td>Telepon</td>
+                        <td>Telepon </td>
                         <td> : {{ $customer->phone }}</td>
                     </tr>
                 </table>
@@ -166,7 +189,31 @@ input:checked + .slider:before {
                     @csrf
                     
                     <input type="hidden" name="id_customer" id="id_customer" value="{{ $id_customer }}">
+                    <input type="hidden" name="nomor_nota" id="nomor_nota" value="{{ $nomor_nota }}">
                     
+                    <button onclick="tampilProduk()" class="btn btn-info btn-lg btn-block" type="button">Cari Produk <i class="fa fa-arrow-right"></i></button>
+                    <br>
+                    {{-- <div class="col-lg-2">
+                        <div class="judul-bayar bg-primary">Total Belanja</div>
+                        <div class="tampil-bayar"></div>
+                        <div class="tampil-terbilang"></div>
+                        
+                        <div class="judul-kembali bg-primary">Total Barang</div>
+                        <div class="tampil-kembali"></div>
+                        <div class="tampil-terbilang_kembali"></div>
+                    </div> --}}
+                    <div class="row">
+                        <div class="column">
+                            <div class="judul-bayar bg-primary">Total Belanja</div>
+                            <div class="tampil-bayar bg-primary"></div>
+                            <div class="tampil-terbilang"></div>
+                          </div>
+                          <div class="column" >
+                            <div class="judul-kembali bg-primary">Total Barang</div>
+                            <div class="tampil-kembali bg-primary"></div>
+                            <div class="tampil-terbilang_kembali"></div>
+                          </div>
+                    </div>
                     <div class="form-group row">
                         <div class="col-lg-5">
                             <div class="input-group">
@@ -174,16 +221,31 @@ input:checked + .slider:before {
                                 <input type="hidden" name="id_produk" id="id_produk">
                                 <input type="hidden" class="form-control" name="kode_produk" id="kode_produk">
                                 <span class="input-group-btn">
-                                    <button onclick="tampilProduk()" class="btn btn-info btn-flat" type="button">Cari Produk <i class="fa fa-arrow-right"></i></button>
+                                    {{-- <button onclick="tampilProdukMulti()" class="btn btn-info btn-flat" type="button">Multi Produk <i class="fa fa-arrow-right"></i></button> --}}
                                 </span>
+                                    
                             </div>
+                            <br>
+                            {{-- <div class="form-group row">
+                                <label for="total_nominal" class="col-lg-3 control-label">Total Nominal : </label>
+                                <div class="col-lg-8">
+                                    <input type="text" id="nominal" class="form-control" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="total_barang" class="col-lg-3 control-label">Total Barang : </label>
+                                <div class="col-lg-4">
+                                    <input type="text" id="barang" class="form-control" readonly>
+                                </div>
+                            </div> --}}
+
                         </div>
                     </div>
 
                 </form>
 
                 <div class="box-body table-responsive">
-                    Ada Produk Special Case ? <a class="toggle-vis" data-column="0"></a><a class="toggle-vis" data-column="1"></a><a class="toggle-vis" data-column="2"></a><a class="toggle-vis" data-column="3"></a><a class="toggle-vis" data-column="4">Click Here</a><a class="toggle-vis" data-column="5"></a><a class="toggle-vis" data-column="6"></a>
+                    {{-- Ada Produk Special Case ? <a class="toggle-vis" data-column="0"></a><a class="toggle-vis" data-column="1"></a><a class="toggle-vis" data-column="2"></a><a class="toggle-vis" data-column="3"></a><a class="toggle-vis" data-column="4">Click Here</a><a class="toggle-vis" data-column="5"></a><a class="toggle-vis" data-column="6"></a> --}}
                     <table class="table table-stiped table-bordered table-cart">
                         <thead>
                             <th width="5%">No</th>
@@ -196,6 +258,8 @@ input:checked + .slider:before {
                         </thead>
                     </table>
                 </div>
+
+                
                 
             </div>
             
@@ -210,9 +274,9 @@ input:checked + .slider:before {
 
             <div class="box-footer">
                 <a href="{{ route('cart.index') }}" class="btn btn-warning btn-sm btn-flat pull-left">
-                    <i class="fa fa-floppy-o"> Simpan Cart</i>
+                    <i class="fa fa-floppy-o"> Simpan </i>
                 </a>
-                <button type="submit" class="btn btn-success btn-sm btn-flat pull-right btn-simpan"><i class="fa fa-shopping-basket"></i> Kirim Cart Ke Kasir</button>
+                {{--  <button type="submit" class="btn btn-success btn-sm btn-flat pull-right btn-simpan"><i class="fa fa-shopping-basket"></i> Kirim Cart Ke Kasir</button> --}}
             </div>
         </div>
     </div>
@@ -220,6 +284,7 @@ input:checked + .slider:before {
 
 @includeIf('cart.produk')
 @includeIf('cart.stock')
+@includeIf('cart.produk_multi')
 @endsection
 
 @push('scripts')
@@ -247,10 +312,40 @@ input:checked + .slider:before {
                 {data: 'total'},
                 {data: 'aksi', searchable: false, sortable: false},
             ],
+            dom: 'Brt',
             paginate: false
-        });
-
+        })
         
+        .on('draw.dt', function () {
+            loadForm($('#nomor_nota').val());
+
+        })
+        ;
+
+        // window.onbeforeunload = (event) => {
+        //     event.preventDefault();
+        //     return "Apakah Anda yakin semua data telah tersimpan";
+        // }
+
+        // table2 = $('.table-produk_multi').DataTable({
+        //     responsive: true,
+        //     processing: true,
+        //     // serverSide: true,
+        //     autoWidth: true,
+        //     ajax: {
+        //         url: '{{ route('produk.data',) }}',
+        //     },
+        //     columns: [
+        //         // {data: 'DT_RowIndex', searchable: false, sortable: false},
+        //         {data: 'kode_produk'},
+        //         {data: 'title'},
+        //         {data: 'base_price'},
+        //         {data: 'reseller_price'},
+        //         {data: 'select_all'},
+               
+        //     ],
+        //     paginate: true
+        // });
         
     $('.table-produk').DataTable();
 
@@ -261,7 +356,7 @@ input:checked + .slider:before {
             $('.form-pembelian').submit();
         });
 
-    
+
     $(document).ready(function () {
  
     $('a.toggle-vis').on('click', function (e) {
@@ -296,14 +391,17 @@ input:checked + .slider:before {
     $(document).on('change', '.count', function () {
             let id = $(this).data('id');
             let jumlah = $(this).val();
+            let id_customer = $('#id_customer').val();
+
             $.post(`{{ url('/cart/update') }}/${id}`, {
                     '_token': $('[name=csrf-token]').attr('content'),
                     '_method': 'POST',
-                    'jumlah' : jumlah
+                    'jumlah' : jumlah,
+                    'id_customer' : id_customer
                 })
                 .done(response => {
                     if (response.status == 'local_product_remove') {
-                        alert('berhasil menambah produk local');
+                        // alert('berhasil menambah produk local');
                         table.ajax.reload();
                     } else if(response.status == 'fail_job_remove'){
                         alert('Produk masih belum sinkron, data berhasil ditambah');
@@ -317,7 +415,7 @@ input:checked + .slider:before {
                         table.ajax.reload();
 
                     } else if(response.status == 'local_product_add'){
-                        alert('berhasil mengurangi produk local');
+                        // alert('berhasil mengurangi produk local');
                         table.ajax.reload();
 
                     } else if(response.status == 'fail_job_add'){
@@ -332,7 +430,7 @@ input:checked + .slider:before {
                         table.ajax.reload();
 
                     } else if(response.status == 'local_product_delete'){
-                        alert('data lokal cart berhasil terhapus');
+                        // alert('data lokal cart berhasil terhapus');
                         table.ajax.reload();
 
                     } else if (response.status == 'fail_job_delete') {
@@ -347,20 +445,38 @@ input:checked + .slider:before {
                         table.ajax.reload();
 
                     } else {
-                        alert('jumlah stok tidak memenuhi');
+                        // alert('jumlah stok tidak memenuhi');
                         table.ajax.reload();
                     }
 
                 })
                 .fail(errors => {
-                    alert('Jumlah melebihi stok');
+                    // alert('Jumlah melebihi stok');
                     table.ajax.reload();                    
 
                 });
         });
 
     
-    
+        $(document).on('change', '.price', function () {
+            let id = $(this).data('id');
+            let jumlah = $(this).val();
+            $.post(`{{ url('/cart/update_price') }}/${id}`, {
+                    '_token': $('[name=csrf-token]').attr('content'),
+                    '_method': 'POST',
+                    'jumlah' : jumlah
+                })
+                .done(response => {
+                    
+                    table.ajax.reload();                    
+
+                })
+                .fail(errors => {
+                    // alert('Jumlah melebihi stok');
+                    table.ajax.reload();                    
+
+                });
+        });
 
 
     function tampilProduk() {
@@ -369,10 +485,17 @@ input:checked + .slider:before {
         hideLoading();
     }
 
-    function pilihProduk() {
+    function tampilProdukMulti() {
+        // showLoading();
+        $('#modal-produk_multi').modal('show');
+        // hideLoading();
+    }
+
+    function pilihProduk(id) {
         // $('#kode_produk').val(sku);
-        KurangiProduk();
-        // tambahProduk();
+        // KurangiProduk();
+        // console.log(id);
+        tambahProduk(id);
     }
     
     function cekStok($sku) {
@@ -406,12 +529,12 @@ input:checked + .slider:before {
                     document.getElementById('gagal').style.display = "block";
                     $('#sku_produk').val(response.sku);
                     $('#stock_produk').val(response.stock);
-                    alert('Gagal terhubung dengan isiTaman, produk tak ditemukan. Yakin ingin menambahkan Produk ?');
+                    alert('Gagal terhubung dengan isiTaman. Yakin ingin menambahkan Produk ?');
                     table.ajax.reload();
                 } else if (response.status == 'local_product') {
                     hideLoading();
-                    alert('data local');
-                    document.getElementById('sukses').style.display = "block";
+                    // alert('data local');
+                    document.getElementById('gagal').style.display = "block";
                     $('#sku_produk').val(response.sku);
                     $('#stock_produk').val(response.stock);
                     table.ajax.reload();
@@ -436,6 +559,55 @@ input:checked + .slider:before {
             })
     }
 
+    function kirimProduk() {
+        
+        let count = $('#produk_kembali').val();  
+        let sku = $('#sku_produk').val();
+        // $('#stock_produk').val('');
+        // $('#sku_produk').val('');
+        // $('#modal-stock').modal('show');
+        // console.log($sku);
+        // let sku = $sku
+        $.get(`{{ url('/produk/send_stock') }}/${sku}/${count}`)
+            .done(response => {
+                if (response.status == "fail") {
+                    alert("data tidak ditemukan di isi taman, yakin ingin melanjutkan transaksi ?");
+                    $('#produk_kembali').val('');  
+                    $('#modal-stock').modal('hide');
+                    $('#modal-stock').modal('hide');
+                    table.ajax.reload();                    
+                } else if (response.status == "fail_produk") {
+                    alert("data produk tidak ditemukan di isi taman, data local ditampilkan");
+                    $('#produk_kembali').val('');  
+                $('#modal-stock').modal('hide');
+                    table.ajax.reload();
+                } else if (response.status == "fail_job") {
+                    alert("data produk belum sinkron dengan isiTaman, data local berhasil ditambah");
+                    $('#produk_kembali').val('');  
+                $('#modal-stock').modal('hide');
+                    table.ajax.reload();
+                } else if (response.status == "local_product"){
+                    // alert("product local");
+                $('#produk_kembali').val('');  
+                $('#modal-stock').modal('hide');
+                table.ajax.reload();    
+                } else {
+                alert("sukses");
+                $('#produk_kembali').val('');  
+                $('#modal-stock').modal('hide');
+                table.ajax.reload();  
+                }                            
+            })
+            .fail(errors => {
+                alert('Terjadi Kesalahan di server atau data produk tidak ditemukan di isiTaman');
+                $('#modal-stock').modal('hide');
+                table.ajax.reload();                    
+
+                return;
+            })
+
+    }
+    
     function KurangiProduk() {
         let count = $('#produk_kembali').val();  
         let sku = $('#sku_produk').val();
@@ -448,10 +620,10 @@ input:checked + .slider:before {
         $.get(`{{ url('/produk/remove_stock') }}/${sku}/${count}`)
             .done(response => {
                 if (response.status == 'fail_stok') {
-                    alert('Jumlah Melebihi Stok');
+                    // alert('Jumlah Melebihi Stok');
                 } else if (response.status == 'local_product') {
                     tambahProduk();
-                    alert('Berhasil menambah dari data local');
+                    // alert('Berhasil menambah dari data local');
                     $('#produk_kembali').val('');  
                     $('#modal-stock').modal('hide');
                     hideProduk();
@@ -496,28 +668,33 @@ input:checked + .slider:before {
 
     
 
-    function tambahProduk() {
-        let count = $('#produk_kembali').val();  
+    function tambahProduk(id) {
+        let count = 1;  
+        let id_produk = id;  
+
         let sku = $('#sku_produk').val();
         let customer_id = $('#customer_id').val();
-        console.log(count);
-        console.log(sku);
-        console.log(customer_id);
+        console.log('jumlah',count);
+        console.log('id produk',id_produk);
+        console.log('customer', customer_id);
 
-            $.post(`{{ url('/cart/addProduct') }}/${sku}/${count}/${customer_id}`, {
+            $.post(`{{ url('/cart/addProduct') }}/${id_produk}/${count}/${customer_id}`, {
                     '_token': $('[name=csrf-token]').attr('content'),
                     '_method': 'post',
                 })
                 .done(response => {
-                    if (response.status == 'fail_stok') {
-                        alert('Stok melebihi');
-                        table.ajax.reload();                    
+                    table.ajax.reload();                    
+                    // hideProduk();
+                    // if (response.status == 'fail_stok') {
+                    //     alert('Stok melebihi');
+                    //     table.ajax.reload();                    
 
-                    } else {
-                        table.ajax.reload();                                            
-                    }
+                    // } else {
+                    //     table.ajax.reload();                                            
+                    // }
                 })
                 .fail(errors => {
+                    // hideProduk();
                 });
     }
 
@@ -530,26 +707,18 @@ input:checked + .slider:before {
                     '_method': 'delete'
                 })
                 .done((response) => {
-                    if (response.status == 'local_product') {
-                        alert('Produk local berhasil dihapus');
-                        table.ajax.reload();
-                    } else if (response.status == 'masih_di_job') {
-                        alert('Data masih di Job, berhasil dihapus dari lokal');
-                        table.ajax.reload();
-                    } else if (response.status == 'fail_send') {
-                        alert('Data terhapus, namun gagal dikirim ke isiTaman');
-                        table.ajax.reload();
-                    } else {
-                        alert('data berhasil dihapus')
-                        table.ajax.reload();
-                    }
+                    table.ajax.reload();
+
                 })
                 .fail((errors) => {
                     
-                alert('Tidak dapat menghapus data');
-                    return;
+                    alert('Tidak dapat menghapus data');
+                    table.ajax.reload();
+
                 });
-        }
+                table.ajax.reload();
+
+            }
     }
 
     function showLoading() {
@@ -588,7 +757,66 @@ function tes(id, cb) {
                 });
     }
 
+    function multi(id, cb) {
+        // console.log($('.add').val(cb.checked));
+        console.log(id);
+        // var x=  $("#add").is(":checked");
+        var x = $(cb).is(":checked");
+        // var column = table.column($(this).attr('data-column'));
+        
+        // let true = "true";
+        // let false = "false";
 
+        console.log(x);
+
+        if (x === true) {
+            tambahProduk(id);
+            console.log(x);
+            // console.log(x);
+
+        } else {
+            console.log(x);
+            // console.log(x);
+
+            let customer_id = $('#customer_id').val();
+            console.log(customer_id);
+            $.post(`{{ url('/cart/cancel') }}/${id}/${customer_id}`, {
+                    '_token': $('[name=csrf-token]').attr('content'),
+                    '_method': 'post',
+                })
+                .done(response => {
+                    table.ajax.reload();                    
+                })
+                .fail(errors => {
+                    
+                });
+        }
+    }
+
+    function loadForm(nomor_nota) {
+        // console.log(nomor_nota);
+        $.get(`{{ url('/cart/loadForm') }}/${nomor_nota}`)
+            .done(response => {
+                console.log(response);
+                $('.tampil-terbilang').text('Rp. '+ response.total_nominal);
+                $('.tampil-terbilang_kembali').text(response.total_barang);
+
+            })
+            .fail(errors => {
+                alert('Tidak dapat menampilkan data');
+                return;
+            })
+    }
+
+    function dess_sess(url) {
+        console.log(url);
+        $.get(url)
+            .done((response) => {
+
+            })
+            .fail((errors) => {                        
+            })
+    }
 
     
 </script>

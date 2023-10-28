@@ -9,7 +9,7 @@ class Cart extends Model
 {
     use HasFactory;
 
-    protected $table = 'cart';
+    protected $table = 'cart_master';
     protected $primaryKey = 'id';
     protected $guarded = [];
 
@@ -19,7 +19,7 @@ class Cart extends Model
     }
     public function produk()
     {
-        return $this->belongsTo(Produk::class, 'product_id', 'id');
+        return $this->belongsTo(ProdukNew::class, 'product_id', 'id');
     }
     public function user()
     {

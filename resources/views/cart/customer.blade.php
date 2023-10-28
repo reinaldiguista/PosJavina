@@ -21,7 +21,7 @@
                                 <td>{{ $item->phone }}</td>
                                 {{-- <td>{{ $item->type->role }}</td> --}}
                                 <td>
-                                    <a href="{{ route('cart.create', $item->id) }}" class="btn btn-primary btn-xs btn-flat">
+                                    <a href="{{ route('cart.create', $item->id) }}" class="btn btn-primary btn-xs ">
                                         <i class="fa fa-check-circle"> pilih</i>
                                     </a>
                                 </td>

@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductsExport;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Produk;
 use App\Models\JobApi;
+use App\Models\Price;
+use App\Models\ProdukNew;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use PDF;
+use Maatwebsite\Excel\Excel;
 
 class ProdukController extends Controller
 {
@@ -19,10 +24,22 @@ class ProdukController extends Controller
      */
     public function index()
     {
-        // $kategori = Kategori::all()->pluck('nama_kategori', 'id_kategori');
+        // $kategori = Category::get();
+        $kategori = ProdukNew::select('kategori')->groupBy('kategori')->get();
+        $jenis_produk = ProdukNew::select('jenis_produk')->groupBy('jenis_produk')->get();
+        $kondisi = ProdukNew::select('kondisi')->groupBy('kondisi')->get();
+        $genus = ProdukNew::select('genus')->groupBy('genus')->get();
+        $supplier = ProdukNew::select('supplier')->groupBy('supplier')->get();
+        $jenis_supplier = ProdukNew::select('jenis_supplier')->groupBy('jenis_supplier')->get();
+        $registrasi_anggrek = ProdukNew::select('registrasi_anggrek')->groupBy('registrasi_anggrek')->get();
+        $grade = ProdukNew::select('grade')->groupBy('grade')->get();
+        $hb_sp = ProdukNew::select('hb_sp')->groupBy('hb_sp')->get();
+        $kelompok_pasar = ProdukNew::select('kelompok_pasar')->groupBy('kelompok_pasar')->get();
+        $enable = ProdukNew::select('enable')->groupBy('enable')->get();
+        
+        // return response()->json($kategori);
 
-
-        return view('produk.index');
+        return view('produk.index', compact('kategori','jenis_produk','kondisi','genus','supplier','jenis_supplier','registrasi_anggrek','grade','hb_sp','kelompok_pasar','enable'));
 
     }
 
@@ -40,7 +57,100 @@ class ProdukController extends Controller
         //     // ->orderBy('kode_produk', 'asc')
         //     ->get();
 
-        $produk = Produk::get();
+        $produk = ProdukNew::get();
+        // $produk = ProdukNew::where('sku', 'D3S-TM02')->first();
+        // $price = $produk->priceRules->limit_1 ;
+        // if ($price == null) {
+        //     # code...
+        //     // return $produk->price->harga_1 ?? 'Rp. 0';
+        //     // return optional($produk->price)->harga_1;
+        //     return $produk->priceRules->harga_1;
+
+        // } else {
+        //     # code...
+        //     return $produk->priceRules->limit_2;
+        // }
+        
+        
+        return datatables()
+            ->of($produk)
+            ->addColumn('sku', function ($produk) {
+                return '<span class="label label-primary">'. $produk->sku .'</span>';
+            })
+            ->addColumn('nama_produk', function ($produk) {
+                return $produk->nama_produk ;
+            })
+            ->addColumn('kategori', function ($produk) {
+                return $produk->kategori ;
+
+                // $price = $produk->price->harga_1 ;
+                
+                // if ($price == null) {
+                //     # code...
+                //     return 'Rp. 0';
+                // } else {
+                //     # code...
+                //     return format_uang($produk->price->harga_1) ;
+                // }
+                
+            })   
+            ->addColumn('harga_terendah', function ($produk) {
+                return format_uang($produk->harga_terendah);
+            })
+            ->addColumn('stock', function ($produk) {
+                return $produk->stock;
+            })
+            ->addColumn('enable', function ($produk) {
+                $status="";
+                if ($produk->enable == 1) {
+                    $status = "Enable";
+                } else {
+                    $status = "Disable";
+                }
+
+                return $status;
+            })
+            //<button type="button" onclick="cekStok(`'. route('produk.sku', $produk->sku) .'`)" class="btn btn-xs btn-warning "><i class="fa fa-cubes"></i>Cek Stok</button>
+            //<br>
+            ->addColumn('aksi', function ($produk) {
+                return '
+                <div>
+                    <button style="margin-top :5px" type="button" onclick="showDetail(`'. route('produk.show', $produk->id) .'`)" class="btn btn-xs btn-success "><i class="fa fa-eye"></i></button>
+                    <button style="margin-top :5px" type="button" onclick="editForm(`'. route('produk.update', $produk->id) .'`)" class="btn btn-xs btn-info "><i class="fa fa-pencil"></i></button>
+                    <button style="margin-top :5px" type="button" onclick="deleteData(`'. route('produk.destroy', $produk->id) .'`)" class="btn btn-xs btn-danger "><i class="fa fa-trash"></i></button>
+                </div>
+                ';
+            })
+            ->addColumn('cek_stok', function ($produk) {
+                return '
+                <div class="btn-group">
+                    <button type="button" onclick="cekStok(`'. route('produk.sku', $produk->sku) .'`)" class="btn btn-xs btn-warning "><i class="fa fa-cubes"></i>Cek Stok</button>
+                    <button type="button" onclick="showDetail(`'. route('produk.show', $produk->id) .'`)" class="btn btn-xs btn-success "><i class="fa fa-eye"></i>Detail Produk</button>
+                </div>
+                ';
+            })
+            ->addColumn('select_all', function ($produk) {
+                return '
+                    <label class="switch">
+                    <input onclick="multi('. $produk->id .', this);" id="'. $produk->id .'"   type="checkbox">
+                    <span class="slider round"></span>
+                    </label>
+                ';
+            })
+            ->rawColumns(['aksi', 'sku', 'cek_stok','select_all'])
+            ->make(true);
+    }
+    // <input type="checkbox" name="id[]" value="'. $carts->id .'">
+    // <button onclick="addProduct()" class="btn btn-lg btn-block"></i>'. $produk->sku.' ------ '. $produk->title .'</button>
+
+    public function data_cepat()
+    {
+        // $produk = Produk::leftJoin('kategori', 'kategori.id_kategori', 'produk.id_kategori')
+        //     ->select('produk.*', 'nama_kategori')
+        //     // ->orderBy('kode_produk', 'asc')
+        //     ->get();
+
+        $produk = ProdukNew::select('sku', 'title', 'stock', 'id')->get();
 
         return datatables()
             ->of($produk)
@@ -53,38 +163,6 @@ class ProdukController extends Controller
             ->addColumn('stock', function ($produk) {
                 return format_uang($produk->stock);
             })   
-            ->addColumn('price', function ($produk) {
-                return format_uang($produk->price);
-            })
-            ->addColumn('offline_price', function ($produk) {
-                return format_uang($produk->offline_price);
-            })
-            ->addColumn('agen_price', function ($produk) {
-                return format_uang($produk->agen_price);
-            })
-            ->addColumn('reseller_price', function ($produk) {
-                return format_uang($produk->reseller_price);
-            })
-            ->addColumn('nomor_meja', function ($produk) {
-                return $produk->nomor_meja ;
-            })
-            ->addColumn('isSync', function ($produk) {
-                if ($produk->isSync == 1) {
-                    return 'Sync';
-                } else {
-                    return 'not_sync';
-                }
-            })
-            ->addColumn('aksi', function ($produk) {
-                return '
-                <div>
-                    <button type="button" onclick="cekStok(`'. route('produk.sku', $produk->sku) .'`)" class="btn btn-xs btn-warning "><i class="fa fa-cubes"></i>Cek Stok</button>
-                    <button type="button" onclick="showDetail(`'. route('produk.show', $produk->id) .'`)" class="btn btn-xs btn-success "><i class="fa fa-eye"></i>Detail Produk</button>
-                    <button type="button" onclick="editForm(`'. route('produk.update', $produk->id) .'`)" class="btn btn-xs btn-info "><i class="fa fa-pencil"></i>Edit Produk</button>
-                    <button type="button" onclick="deleteData(`'. route('produk.destroy', $produk->id) .'`)" class="btn btn-xs btn-danger "><i class="fa fa-trash"></i>Hapus Produk</button>
-                </div>
-                ';
-            })
             ->addColumn('cek_stok', function ($produk) {
                 return '
                 <div class="btn-group">
@@ -93,7 +171,7 @@ class ProdukController extends Controller
                 </div>
                 ';
             })
-            ->rawColumns(['aksi', 'kode_produk', 'cek_stok'])
+            ->rawColumns(['kode_produk', 'cek_stok'])
             ->make(true);
     }
 
@@ -115,7 +193,7 @@ class ProdukController extends Controller
      */
     public function store(Request $request)
     {
-        // $produk = Produk::create($request->all());
+        $produk = ProdukNew::create($request->all());
         // $produk->sku = "sku";
         // $produk->stock = 10;
         // $produk->update();
@@ -139,8 +217,8 @@ class ProdukController extends Controller
      */
     public function show($id)
     {
-        $produk = Produk::find($id);
-
+        $produk = ProdukNew::find($id);
+        
         return response()->json($produk);
     }
 
@@ -166,10 +244,24 @@ class ProdukController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $produk = Produk::find($id);
+        $produk = ProdukNew::find($id);
         $produk->update($request->all());
 
-        return view('produk.index');
+        $kategori = ProdukNew::select('kategori')->groupBy('kategori')->get();
+        $jenis_produk = ProdukNew::select('jenis_produk')->groupBy('jenis_produk')->get();
+        $kondisi = ProdukNew::select('kondisi')->groupBy('kondisi')->get();
+        $genus = ProdukNew::select('genus')->groupBy('genus')->get();
+        $supplier = ProdukNew::select('supplier')->groupBy('supplier')->get();
+        $jenis_supplier = ProdukNew::select('jenis_supplier')->groupBy('jenis_supplier')->get();
+        $registrasi_anggrek = ProdukNew::select('registrasi_anggrek')->groupBy('registrasi_anggrek')->get();
+        $grade = ProdukNew::select('grade')->groupBy('grade')->get();
+        $hb_sp = ProdukNew::select('hb_sp')->groupBy('hb_sp')->get();
+        $kelompok_pasar = ProdukNew::select('kelompok_pasar')->groupBy('kelompok_pasar')->get();
+        $enable = ProdukNew::select('enable')->groupBy('enable')->get();
+        
+        return view('produk.index', compact('kategori','jenis_produk','kondisi','genus','supplier','jenis_supplier','registrasi_anggrek','grade','hb_sp','kelompok_pasar','enable'));
+
+        // return view('produk.index');
     }
 
     /**
@@ -180,7 +272,7 @@ class ProdukController extends Controller
      */
     public function destroy($id)
     {
-        $produk = Produk::find($id);
+        $produk = ProdukNew::find($id);
         $produk->delete();
 
         return response(null, 204);
@@ -189,7 +281,7 @@ class ProdukController extends Controller
     public function deleteSelected(Request $request)
     {
         foreach ($request->id as $id) {
-            $produk = Produk::find($id);
+            $produk = ProdukNew::find($id);
             $produk->delete();
         }
 
@@ -198,86 +290,94 @@ class ProdukController extends Controller
 
     public function sku($sku)
     {
-    $produk = Produk::where('sku', $sku)->first();
-    
-    if ($produk->isLocal == 1) {
-        
+        $produk = ProdukNew::where('sku', $sku)->first();
         $data  = [
-            'sku' => $sku,
+            'sku' => $produk->id,
             'stock' => $produk->stock,
             'status' => "local_product"
         ];
         
         return response($data);
-
-    } else {
-        $job = JobApi::where('sku', $sku)->where('status' , 0)->first();
     
-        if (!empty($job)) {
-            $produk->isSync = 0;
-            $produk->update();
+        // if ($produk->isLocal == 1) {
             
-            $data  = [
-                'sku' => $sku,
-                'stock' => $produk->stock,
-                'status' => "fail_job"
-            ];
-            return response($data);
+        //     $data  = [
+        //         'sku' => $sku,
+        //         'stock' => $produk->stock,
+        //         'status' => "local_product"
+        //     ];
+            
+        //     return response($data);
 
-        } else {
-            
-            $produk->isSync = 0;
-            $produk->update();
+        // } else {
+        //     $job = JobApi::where('sku', $sku)->where('status' , 0)->first();
         
-            try {
-                $response =  Http::get('https://pos.isitaman.com/product/getBySku?username=isitaman&password=1s1t4m4nJ@v1n4.&sku='. $sku )['data'];
-            
-                if (!empty($response)) {            
-                        
-                        $data  = [
-                            'sku' => $sku,
-                            'stock' => $response['stock'],
-                            'status' => "sukses",
-                            
-                        ];
-                        $produk->stock = $response['stock'];
-                        $produk->stock_isitaman = $response['stock'];
-                        $produk->isSync = 1;
-                        $produk->update();
-            
-                    // var_dump($response);
-                    return response($data);
-                } else {
-                    $data  = [
-                        'sku' => $sku,
-                        'stock' => $response['stock'],
-                        'status' => "fail_connect"
-                    ];
-                    
-                    return response($data);
-                }            
-            } 
-            catch (\Throwable $th) {
-                $data  = [
-                    'sku' => $sku,
-                    'stock' => $produk->stock,
-                    'status' => 'fail_produk'
-                ]; 
-                        $produk->isSync = 0;
-                        $produk->update();
+        //     if (!empty($job)) {
+        //         $produk->isSync = 0;
+        //         $produk->update();
+                
+        //         $data  = [
+        //             'sku' => $sku,
+        //             'stock' => $produk->stock,
+        //             'status' => "fail_job"
+        //         ];
+        //         return response($data);
 
-                return response($data);
-                // var_dump($data);
-            }
-        }
-    }       
+        //     } else {
+                
+        //         $produk->isSync = 0;
+        //         $produk->update();
+            
+        //         try {
+        //             $response =  Http::get('https://pos.isitaman.com/product/getBySku?username=isitaman&password=1s1t4m4nJ@v1n4.&sku='. $sku )['data'];
+                
+        //             if (!empty($response)) {            
+                            
+        //                     $data  = [
+        //                         'sku' => $sku,
+        //                         'stock' => $response['stock'],
+        //                         'status' => "sukses",
+                                
+        //                     ];
+        //                     $produk->stock = $response['stock'];
+        //                     $produk->stock_isitaman = $response['stock'];
+        //                     $produk->isSync = 1;
+        //                     $produk->update();
+                
+        //                 // var_dump($response);
+        //                 return response($data);
+        //             } else {
+        //                 $data  = [
+        //                     'sku' => $sku,
+        //                     'stock' => $response['stock'],
+        //                     'status' => "fail_connect"
+        //                 ];
+                        
+        //                 return response($data);
+        //             }            
+        //         } 
+        //         catch (\Throwable $th) {
+        //             $data  = [
+        //                 'sku' => $sku,
+        //                 'stock' => $produk->stock,
+        //                 'status' => 'fail_produk'
+        //             ]; 
+        //                     $produk->isSync = 0;
+        //                     // $produk->isLocal = 1;
+        //                     $produk->update();
+
+        //             return response($data);
+        //             // var_dump($data);
+        //         }
+        //     }
+        // }       
 }
 
 
     //kirim stok ke isitaman
     public function send_stock($sku, $count)
     {    
-    $produk = Produk::where('sku', $sku)->first();
+    $produk = ProdukNew::where('sku', $sku)->first();
     
     if ($produk->isLocal == 1) {
         
@@ -361,7 +461,7 @@ class ProdukController extends Controller
     //ambil stok dari isitaman
     public function remove_stock($sku, $count)
     {    
-        $produk = Produk::where('sku', $sku)->first();
+        $produk = ProdukNew::where('sku', $sku)->first();
         
         $job = JobApi::where('sku', $sku)->where('status' , 0)->first();
         
@@ -457,7 +557,10 @@ class ProdukController extends Controller
 
     }
     
-
+    public function export() 
+    {
+        return Excel::download(new ProductsExport, 'users.xlsx');
+    }
     // public function cetakBarcode(Request $request)
     // {
     //     $dataproduk = array();

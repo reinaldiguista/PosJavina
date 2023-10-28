@@ -13,4 +13,14 @@ class Invoice extends Model
     protected $primaryKey = 'id';
     protected $guarded = [];
 
+    public function member()
+    {
+        return $this->belongsTo(Member::class, 'customer_id', 'id');
+    }
+
+    public function invoice_pay()
+    {
+        return $this->hasMany(InvoicePay::class);
+    }
+
 }

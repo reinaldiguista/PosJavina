@@ -12,6 +12,8 @@
                     <thead>
                         <th>SKU</th>
                         <th>title</th>
+                        <th>Harga</th>
+                        <th>Stok</th>
                         <th><i class="fa fa-cog"></i></th>
                     </thead>
                     <tbody>
@@ -22,18 +24,27 @@
                                 <tr>
                                     <td>{{ $item->sku }}</td>
                                     <td>{{ $item->title }}</td>
+                                    <td>{{ format_uang($item->base_price) }}</td>
+                                    <td>{{ $item->stock }}</td>
+
+                                    {{-- <td>{{ format_uang($item->reseller_price) }}</td> --}}
+
                                     <td>
-                                    {{-- <a href="#" class="btn btn-primary btn-xs btn-flat"
+                                    {{-- <a href="#" class="btn btn-success btn-xs "
                                         onclick="pilihProduk('{{ $item->id }}')">
                                         <i class="fa fa-check-circle"></i>
                                         Pilih
                                     </a> --}}
+                                    <label class="switch">
+                                        <input onclick="multi({{ $item->id }}, this);" id="{{ $item->id }}"   type="checkbox">
+                                        <span class="slider round"></span>
+                                    </label>
     
-                                    <a href="#" class="btn btn-success btn-xs btn-flat"
+                                    {{-- <a href="#" class="btn btn-success btn-xs btn-flat"
                                         onclick="cekStok('{{ route('produk.sku', $item->sku) }}')">
                                         <i class="fa fa-cubes"></i>
                                         Pilih
-                                    </a>
+                                    </a> --}}
                                     </td>
                                 </tr>
                             @endforeach

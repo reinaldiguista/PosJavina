@@ -9,17 +9,26 @@ class ListProductTransaction extends Model
 {
     use HasFactory;
 
-    protected $table = 'list_product_transaction';
+    protected $table = 'list_product_transaction_master';
     protected $primaryKey = 'id';
     protected $guarded = [];
 
     public function transaction()
     {
-        return $this->belongsTo(Transaction::class);
+        return $this->belongsTo(Pembelian::class, 'transaction_id', 'id');
     }
     
     public function produk()
     {
-        return $this->belongsTo(Produk::class, 'product_id', 'id');
+        return $this->belongsTo(ProdukNew::class, 'product_id', 'id');
     }
+
+    public function member()
+    {
+        return $this->belongsTo(Member::class, 'customer_id', 'id');
+    }   
+    public function cart()
+    {
+        return $this->belongsTo(Cart::class, 'cart_id', 'id');
+    }   
 }

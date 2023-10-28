@@ -17,21 +17,25 @@
         <div class="box">
             <div class="box-header with-border">
                 <button onclick="addForm('{{ route('produk.store') }}')" class="btn btn-success btn-lg btn-block"><i class="fa fa-plus-circle"></i> Tambah</button>
+                <br>
+                <a href="{{ route('export_excel.export') }}" class="btn btn-success">EXPORT</a>
+                {{-- <a href="{{ route('export_excel.export') }}" class="btn btn-success">IMPORT</a> --}}
+                <a href="" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal"> IMPORT</a>
+                
             </div>
             <div class="box-body table-responsive">
                 <form action="" method="post" class="form-produk">
                     @csrf
                     <table class="table table-stiped table-bordered">
                         <thead>
-                            <th>Kode</th>
-                            <th>Title</th>
-                            <th>stock</th>
-                            <th>Online Price</th>
-                            <th>Offline price</th>
-                            <th>Agen price</th>
-                            <th>Reseller_price</th>
-                            <th>no. meja</th>
-                            <th>isSync</th>
+                            <th>Kode Produk</th>
+                            <th>Nama Produk</th>
+                            <th>Kategori</th>
+                            {{-- <th>Online Price</th> --}}
+                            <th>Harga Terendah</th>
+                            <th>Stock</th>
+                            <th>Enable/Disable</th>
+                            {{-- <th>isSync</th> --}}
                             <th width="15%"><i class="fa fa-cog"></i></th>
                         </thead>
                     </table>
@@ -41,13 +45,46 @@
     </div>
 </div>
 
+<div>
+    
+      
+      <!-- Modal -->
+      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Import Produk</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <form action="{{ route('export_excel.import') }}" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    {{ csrf_field() }}
+                    <div class="form-group">
+                        <input type="file" name="file" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </form>
+          </div>
+        </div>
+      </div>
+</div>
+
 @includeIf('produk.form')
+@includeIf('produk.edit')
 @includeIf('produk.detail')
 @includeIf('produk.stock')
 
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
     let table;
 
@@ -61,15 +98,14 @@
                 url: '{{ route('produk.data') }}',
             },
             columns: [
-                {data: 'kode_produk'},
-                {data: 'title'},
+                {data: 'sku'},
+                {data: 'nama_produk'},
+                {data: 'kategori'},
+                {data: 'harga_terendah'},
+                // {data: 'offline_price'},
                 {data: 'stock'},
-                {data: 'price'},
-                {data: 'offline_price'},
-                {data: 'agen_price'},
-                {data: 'reseller_price'},
-                {data: 'nomor_meja'},
-                {data: 'isSync'},
+                {data: 'enable'},
+                // {data: 'isSync'},
                 {data: 'aksi', searchable: false, sortable: false},
             ]
         });
@@ -78,6 +114,89 @@
         $('[name=select_all]').on('click', function () {
             $(':checkbox').prop('checked', this.checked);
         });
+
+        $(document).ready(function () {
+            $("#kategori").select2({
+                placeholder: 'Select an option',
+                tags: true,
+                allowClear: true,
+                dropdownAutoWidth : true
+
+            });
+            $("#jenis_produk").select2({
+                placeholder: 'Select an option',
+                tags: true,
+                allowClear: true,
+                dropdownAutoWidth : true
+                
+            });
+            $("#kondisi").select2({
+                placeholder: 'Select an option',
+                tags: true,
+                allowClear: true,
+                dropdownAutoWidth : true
+
+            });
+            $("#genus").select2({
+                placeholder: 'Select an option',
+                tags: true,
+                allowClear: true,
+                dropdownAutoWidth : true
+
+            });
+            $("#supplier").select2({
+                placeholder: 'Select an option',
+                tags: true,
+                allowClear: true,
+                dropdownAutoWidth : true
+
+            });
+            $("#jenis_supplier").select2({
+                placeholder: 'Select an option',
+                tags: true,
+                allowClear: true,
+                dropdownAutoWidth : true
+
+            });
+            $("#registrasi_anggrek").select2({
+                placeholder: 'Select an option',
+                tags: true,
+                allowClear: true,
+                dropdownAutoWidth : true
+
+            });
+            $("#grade").select2({
+                placeholder: 'Select an option',
+                tags: true,
+                allowClear: true,
+                dropdownAutoWidth : true
+
+            });
+            $("#hb_sp").select2({
+                placeholder: 'Select an option',
+                tags: true,
+                allowClear: true,
+                dropdownAutoWidth : true
+
+            });
+            $("#kelompok_pasar").select2({
+                placeholder: 'Select an option',
+                tags: true,
+                allowClear: true,
+                dropdownAutoWidth : true
+
+            });
+            $("#enable").select2({
+                placeholder: 'Select an option',
+                tags: true,
+                allowClear: true,
+                dropdownAutoWidth : true
+
+            });
+        // let x = $(this).val();
+        // console.log(x);
+        })
+        
     });
 
     function addForm(url) {
@@ -96,9 +215,14 @@
 
         $.get(url)
             .done((response) => {
-                $('#modal-detail [name=kategori]').val(response.kategori);
-                $('#modal-detail [name=volmetric]').val(response.volmetric);
-                $('#modal-detail [name=desc]').val(response.desc);
+                $('#modal-detail [name=jenis_produk]').val(response.jenis_produk);
+                $('#modal-detail [name=kondisi]').val(response.kondisi);
+                $('#modal-detail [name=genus]').val(response.genus);
+                $('#modal-detail [name=supplier]').val(response.supplier);
+                $('#modal-detail [name=registrasi_anggrek]').val(response.registrasi_anggrek);
+                $('#modal-detail [name=grade]').val(response.grade);
+                $('#modal-detail [name=hb_sp]').val(response.hb_sp);
+
             })
             .fail((errors) => {
                 alert('Tidak dapat menampilkan data');
@@ -107,31 +231,33 @@
     }
 
     function editForm(url) {
-        $('#modal-form').modal('show');
-        $('#modal-form .modal-title').text('Edit Produk');
+        $('#modal-edit').modal('show');
+        $('#modal-edit .modal-title').text('Edit Produk');
 
-        $('#modal-form form')[0].reset();
-        $('#modal-form form').attr('action', url);
-        $('#modal-form [name=_method]').val('put');
-        $('#modal-form [name=title]').focus();
+        $('#modal-edit form')[0].reset();
+        $('#modal-edit form').attr('action', url);
+        $('#modal-edit [name=_method]').val('put');
+        $('#modal-edit [name=title]').focus();
 
         $.get(url)
             .done((response) => {
-                $('#modal-form [name=title]').val(response.title);
-                $('#modal-form [name=sku]').val(response.sku);
-                $('#modal-form [name=desc]').val(response.desc);
-                $('#modal-form [name=length]').val(response.length);
-                $('#modal-form [name=width]').val(response.width);
-                $('#modal-form [name=height]').val(response.height);
-                $('#modal-form [name=volmetric]').val(response.volmetric);
-                $('#modal-form [name=price]').val(response.price);
-                $('#modal-form [name=agen_price]').val(response.agen_price);
-                $('#modal-form [name=reseller_price]').val(response.reseller_price);
-                $('#modal-form [name=offline_price]').val(response.offline_price);
-                $('#modal-form [name=handling_fee]').val(response.handling_fee);
-                $('#modal-form [name=stock]').val(response.stock);
-                $('#modal-form [name=stock_offline]').val(response.stock_offline);
-                $('#modal-form [name=discount]').val(response.discount);
+                $('#modal-edit [name=sku]').val(response.sku);
+                $('#modal-edit [name=kategori]').val(response.kategori);
+                $('#modal-edit [name=nama_produk]').val(response.nama_produk);
+                $('#modal-edit [name=jenis_produk]').val(response.jenis_produk);
+                $('#modal-edit [name=kondisi]').val(response.kondisi);
+                $('#modal-edit [name=genus]').val(response.genus);
+                $('#modal-edit [name=supplier]').val(response.supplier);
+                $('#modal-edit [name=jenis_supplier]').val(response.jenis_supplier);
+                $('#modal-edit [name=registrasi_anggrek]').val(response.registrasi_anggrek);
+                $('#modal-edit [name=grade]').val(response.grade);
+                $('#modal-edit [name=hb_sp]').val(response.hb_sp);
+                $('#modal-edit [name=kelompok_pasar]').val(response.kelompok_pasar);
+                $('#modal-edit [name=kode_kebun]').val(response.kode_kebun);
+                $('#modal-edit [name=harga_terendah]').val(response.harga_terendah);
+                $('#modal-edit [name=stock]').val(response.stock);
+                $('#modal-edit [name=hpp]').val(response.hpp);
+                $('#modal-edit [name=enable]').val(response.enable);
             })
             .fail((errors) => {
                 alert('Tidak dapat menampilkan data');
@@ -199,7 +325,7 @@
                     $('#stock_produk').val(response.stock);
                     table.ajax.reload();
                 } else if (response.status == "local_product") {
-                    alert("product Local");
+                    // alert("product Local");
                     $('#sku_produk').val(response.sku);
                     $('#stock_produk').val(response.stock);
                     table.ajax.reload();
@@ -247,7 +373,7 @@
                 $('#modal-stock').modal('hide');
                     table.ajax.reload();
                 } else if (response.status == "local_product"){
-                    alert("product local");
+                    // alert("product local");
                 $('#produk_kembali').val('');  
                 $('#modal-stock').modal('hide');
                 table.ajax.reload();    
@@ -296,6 +422,8 @@
             })
 
     }
+
+    
     // function cetakBarcode(url) {
     //     if ($('input:checked').length < 1) {
     //         alert('Pilih data yang akan dicetak');

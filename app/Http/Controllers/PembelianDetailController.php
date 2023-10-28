@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Address;
 use App\Models\Cart;
+use App\Models\CartTransaction;
 use App\Models\Diskon;
 use App\Models\JobApi;
 use App\Models\ListProductTransaction;
@@ -11,6 +13,7 @@ use App\Models\Pembelian;
 use App\Models\PembelianDetail;
 use App\Models\Penjualan;
 use App\Models\Produk;
+use App\Models\ProdukNew;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Client\Response;
@@ -25,16 +28,21 @@ class PembelianDetailController extends Controller
     {
         $id_pembelian = session('transaction_id');
         $id_customer = session('customer_id');
-        $produk = Produk::orderBy('title')->get();
+        $produk = ProdukNew::orderBy('id', 'asc')->get();
         $member = Member::find(session('customer_id'));
+        $address = Address::get();
         
+        $name = $member->name;
+        $phone = $member->phone;
+        // $dropship = $name . " - " . $phone;
+
         $diskon = Diskon::
         select('name', 'discount')
         ->where('status_discount', 1)
         ->get();
 
-        $transaction = Penjualan::find(session('transaction_id'));
-
+        $transaction = Pembelian::find(session('transaction_id'));
+        // return $transaction;
         if ($transaction) {
             $total=0;
             $total_item=0;
@@ -54,7 +62,7 @@ class PembelianDetailController extends Controller
             }
 
         } else {
-            $transaction2 = Penjualan::where('order_type', 0)->where('customer_id', $id_customer)->first();
+            $transaction2 = Pembelian::where('order_type', 0)->where('customer_id', $id_customer)->first();
             $total=0;
             $total_item=0;
     
@@ -74,15 +82,150 @@ class PembelianDetailController extends Controller
         }
         
         
+        return view('pembelian_detail.index', compact('id_pembelian', 'id_customer', 'produk', 'member', 'carts', 'total', 'transaction', 'diskon', 'address'));
+    
+    }
 
-        return view('pembelian_detail.index', compact('id_pembelian', 'id_customer', 'produk', 'member', 'carts', 'total', 'transaction', 'diskon'));
+    public function index_online()
+    {
+        $id_pembelian = session('transaction_id_ON');
+        $id_customer = session('customer_id_ON');
+        $produk = ProdukNew::orderBy('nama_produk', 'asc')->get();
+        $member = Member::find(session('customer_id_ON'));
+        
+        $diskon = Diskon::
+        select('name', 'discount')
+        ->where('status_discount', 1)
+        ->get();
+
+        $transaction = Pembelian::find(session('transaction_id_ON'));
+
+        if ($transaction) {
+            $total=0;
+            $total_item=0;
+    
+            $carts = Cart::where('isSend', 1)->where('flag', 0)->where('customer_id', session('customer_id_ON'))->get();
+            foreach ($carts as $cart) {
+    
+                $total += $cart->base_price * $cart->count;
+                $total_item += $cart->count;
+            }
+    
+            $transaction->total_price = $total;
+            $transaction->update();
+    
+            if (! $member) {
+                abort(404);
+            }
+
+        } else {
+            $transaction2 = Pembelian::where('order_type', 0)->where('customer_id', $id_customer)->first();
+            $total=0;
+            $total_item=0;
+    
+            $carts = Cart::where('isSend', 1)->where('flag', 0)->where('customer_id', session('customer_id_ON'))->get();
+            foreach ($carts as $cart) {
+    
+                $total += $cart->base_price * $cart->count;
+                $total_item += $cart->count;
+            }
+    
+            $transaction2->total_price = $total;
+            $transaction2->update();
+    
+            if (! $member) {
+                abort(404);
+            }
+        }
+        
+        
+
+        return view('pembelian_detail.index_online', compact('id_pembelian', 'id_customer', 'produk', 'member', 'carts', 'total', 'transaction', 'diskon'));
     
     }
 
 
     public function data($id)
     {
-        $transaction = Penjualan::where('id', $id)->first();
+        $transaction = Pembelian::where('id', $id)->first();
+        
+        $detail = Cart::
+        where('flag', 0)
+        ->where('isSend', 1)
+        ->where('customer_id', $transaction->customer_id)                        
+        ->get();
+
+        $data = array();
+        $total = 0;
+        $total_item = 0;
+        
+
+        foreach ($detail as $item) {
+            
+            $row = array();
+            $row['sku'] = '<span class="label label-success">'. $item->produk['sku'] .'</span';
+            $row['title'] = $item->produk['title'];
+            $row['base_price']  = 'Rp. '. format_uang($item->base_price);
+            $row['count']      = '<input type="number" class="form-control input-sm count" data-id="'. $item->id .'" value="'. $item->count .'">';
+            $row['total_price']    = 'Rp. '. format_uang($item->base_price * $item->count);
+            $row['final_price']    = 'Rp. '. format_uang($item->final_price);
+            $row['diskon']      = '<input type="number" class="form-control input-sm discount" data-id="'. $item->id .'" value="'. $item->discount .'">';
+            $row['subtotal']    = 'Rp. '. format_uang($item->final_price);
+            
+            if ($item->isSpecialCase == 1) {
+                $row['aksi']        = '<div class="btn-group">
+                    <button onclick="deleteData(`'. route('cart.destroy', $item->id) .'`)" class="btn btn-xs btn-danger "><i class="fa fa-trash"></i> Hapus produk</button>
+                    <label class="switch">
+                    <input onclick="tes('. $item->id .', this);" id="'. $item->id .'"  checked="true" type="checkbox">
+                    <span class="slider round"></span>
+                    </label>
+                </div>';            
+            
+            } else if($item->isSpecialCase == 0) {
+                $row['aksi']        = '<div class="btn-group">
+                <button onclick="deleteData(`'. route('cart.destroy', $item->id) .'`)" class="btn btn-xs btn-danger "><i class="fa fa-trash"></i> Hapus produk</button>
+                <label class="switch">
+                <input onclick="tes('. $item->id .', this);" id="'. $item->id .'"   type="checkbox">
+                <span class="slider round"></span>
+                </label>
+            </div>';   
+            } else {
+                
+            }
+            
+            
+            $data[] = $row;
+            $total += $item->final_price;
+            $total_item += $item->count;
+        }
+
+        $transaction->total_price = $total;
+        $transaction->update();
+
+        $data[] = [
+            'sku' => '
+                <div class="total hide">'. $total .'</div>
+                <div class="total_item hide">'. $total_item .'</div>',
+            'title' => '',
+            'base_price'  => '',
+            'count'      => '',
+            'total_price'    => '',
+            'final_price'    => '',
+            'diskon'    => '',
+            'subtotal'    => '',
+            'aksi'        => '',
+        ];
+
+        return datatables()
+            ->of($data)
+            ->addIndexColumn()
+            ->rawColumns(['aksi', 'sku', 'count', 'diskon'])
+            ->make(true);
+    }
+
+    public function data_online($id)
+    {
+        $transaction = Pembelian::where('id', $id)->first();
         
         $detail = Cart::
         where('flag', 0)
@@ -160,7 +303,7 @@ class PembelianDetailController extends Controller
 
     public function store(Request $request)
     {
-        $produk = Produk::where('id_produk', $request->id_produk)->first();
+        $produk = ProdukNew::where('id', $request->id_produk)->first();
         if (! $produk) {
             return response()->json('Data gagal disimpan', 400);
         }
@@ -170,21 +313,21 @@ class PembelianDetailController extends Controller
         return response()->json('Data berhasil disimpan', 200);
     }
 
+    public function address($id)
+    {
+        $address = Address::find($id);
+        // var_dump($address);
+        return response()->json($address);
+    }
+
     public function addProduct($sku, $count, $customer_id){
         
         $id_customer = $customer_id;
         $member = Member::where('id', $id_customer)->first();
-        $produk = Produk::where('sku', $sku)->first();
+        $produk = ProdukNew::where('id', $sku)->first();
+        
         if (! $produk) {
             return response()->json('Data gagal disimpan', 400);
-        }
-
-        
-        if ($produk->stock < $count) {
-            $data  = [
-                'status' => 'fail_stok',
-            ]; 
-            return response($data);
         }
 
         $id = auth()->id();
@@ -192,17 +335,29 @@ class PembelianDetailController extends Controller
         $detail->employee_id = $id;
         $detail->customer_id = $id_customer;
         $detail->product_id = $produk->id;
+        // $detail->base_price = $produk->harga_terendah;
         
+        // if ($member->customer_type == 1) {
+        //     $detail->base_price = $produk->price;
+        // } else if ($member->customer_type == 2) {
+        //     $detail->base_price = $produk->offline_price;
+        // } else if ($member->customer_type == 3) {
+        //     $detail->base_price = $produk->reseller_price;
+        // } else if ($member->customer_type == 4) {
+        //     $detail->base_price = $produk->agen_price;
+        // } else {
+        //     # code...
+        // }
+
         if ($member->customer_type == 1) {
-            $detail->base_price = $produk->price;
+            $detail->base_price = $produk->price->harga_1;
         } else if ($member->customer_type == 2) {
-            $detail->base_price = $produk->offline_price;
+            $detail->base_price = $produk->price->harga_1;
         } else if ($member->customer_type == 3) {
-            $detail->base_price = $produk->reseller_price;
+            $detail->base_price = $produk->price->harga_2;
         } else if ($member->customer_type == 4) {
-            $detail->base_price = $produk->agen_price;
+            $detail->base_price = $produk->price->harga_3;
         } else {
-            # code...
         }
 
         $detail->count = $count;
@@ -213,13 +368,138 @@ class PembelianDetailController extends Controller
         $detail->save();
 
 
-        return response()->json('Data berhasil ditambah', 200);
+        return response()->json($member->customer_type, 200);
+    
+    }
+
+    public function addProductKasir($sku, $count, $harga, $customer_id, $nomor_nota){
+        
+        $id_customer = $customer_id;
+        $member = Member::where('id', $id_customer)->first();
+        // $nomor_nota = session('nomor_nota_kasir');
+
+        $produk = ProdukNew::where('id', $sku)->first();
+        
+        if (! $produk) {
+            return response()->json('Data gagal disimpan', 400);
+        }
+
+        $id = auth()->id();
+        $detail = new Cart();
+        $detail->employee_id = $id;
+        $detail->nomor_nota = $nomor_nota;
+        $detail->customer_id = $id_customer;
+        $detail->product_id = $produk->id;
+        $detail->base_price = $harga;
+        
+        // if ($member->customer_type == 1) {
+        //     $detail->base_price = $produk->price;
+        // } else if ($member->customer_type == 2) {
+        //     $detail->base_price = $produk->offline_price;
+        // } else if ($member->customer_type == 3) {
+        //     $detail->base_price = $produk->reseller_price;
+        // } else if ($member->customer_type == 4) {
+        //     $detail->base_price = $produk->agen_price;
+        // } else {
+        //     # code...
+        // }
+
+        // if ($member->customer_type == 1) {
+        //     $detail->base_price = $produk->price->harga_1;
+        // } else if ($member->customer_type == 2) {
+        //     $detail->base_price = $produk->price->harga_1;
+        // } else if ($member->customer_type == 3) {
+        //     $detail->base_price = $produk->price->harga_2;
+        // } else if ($member->customer_type == 4) {
+        //     $detail->base_price = $produk->price->harga_3;
+        // } else {
+        // }
+
+        $detail->count = $count;
+        $detail->final_price = $detail->base_price * $detail->count;
+        $detail->isSpecialCase = 0;
+        $detail->isSend = 1;
+        $detail->flag = 0;
+        $detail->save();
+
+        $cart_transaction = new CartTransaction();
+        $cart_transaction->cart_id = $detail->id;
+        $cart_transaction->transaction_id = session('transaction_id');
+        $cart_transaction->employee_id = $detail->employee_id;
+        $cart_transaction->customer_id = $detail->customer_id;
+        $cart_transaction->product_id = $detail->product_id;
+        $cart_transaction->base_price = $detail->base_price;
+        $cart_transaction->final_price = $detail->final_price;
+        $cart_transaction->count = $detail->count;
+        $cart_transaction->discount = $detail->discount;
+        $cart_transaction->save();    
+
+
+        return response()->json($member->customer_type, 200);
+    
+    }
+
+    public function addProductSlider($id, $count, $customer_id){
+        
+        $id_customer = $customer_id;
+        $member = Member::where('id', $id_customer)->first();
+        $produk = ProdukNew::where('id', $id)->first();
+
+        if (!$produk) {
+            return response()->json('Data Produk Tidak Ditemukan', 400);
+        } 
+
+        // if ($produk->stock < $count) {
+        //     $data  = [
+        //         'status' => 'fail_stok',
+        //     ]; 
+        //     return response($data);
+        // }
+
+        if ($produk->stock > 0) {
+            $produk->stock -= 1;
+            $produk->update();
+            
+        } else {
+            # code...
+        }
+        
+        
+        $id = auth()->id();
+        $detail = new Cart();
+        // $detail->nomor_nota = session('nomor_nota');
+        $detail->employee_id = $id;
+        $detail->customer_id = $id_customer;
+        $detail->product_id = $produk->id;
+        $detail->base_price = $produk->harga_terendah;
+
+        // if ($member->customer_type == 1) {
+        //     $detail->base_price = $produk->offline_price;
+        // } else if ($member->customer_type == 2) {
+        //     $detail->base_price = $produk->offline_price;
+        // } else if ($member->customer_type == 3) {
+        //     $detail->base_price = $produk->reseller_price;
+        // } else if ($member->customer_type == 4) {
+        //     $detail->base_price = $produk->agen_price;
+        // } else {
+        //     # code...
+        // }
+
+        $detail->count = $count;
+        $detail->final_price = $detail->base_price * $detail->count;
+        $detail->isSpecialCase = 0;
+        $detail->isSend = 1;
+        $detail->flag = 0;
+        $detail->save();
+
+        return response()->json($member->customer_type, 200);
     
     }
     
     public function case($id, $case)
     {
         $cart = Cart::find($id);
+        // return $cart;
         $cart->final_price = $cart->base_price * $cart->count;
 
         if ($case == "true") {
@@ -268,7 +548,7 @@ class PembelianDetailController extends Controller
         
         $detail->final_price = $detail->base_price * $detail->count;
         
-        $produk = Produk::find($detail->product_id);
+        $produk = ProdukNew::find($detail->product_id);
         $stok = $produk->stock;
         $sku = $produk->sku;
         if ($count != 0) {
@@ -378,9 +658,70 @@ class PembelianDetailController extends Controller
         $detail->update();
     }
     
+    public function discount(Request $request, $id, $transaction, $customer)
+    {
+        // $transaction = Penjualan::find(session('transaction_id'));
+        $transaction = Pembelian::find($transaction);
+        // return $transaction;
+        $total=0;
+        $total_item=0;
+        $carts = Cart::where('customer_id', $customer)->get();
+
+        $detail = Cart::find($id);
+        $diskon = $request->discount;
+        $detail->final_price = $detail->base_price * $detail->count;
+
+        if ($detail->isSpecialCase == 1) {
+            if ($diskon != 0) {
+                if ( 0 < $diskon && $diskon <= 100 ) {
+                    $detail->discount = $diskon;
+                    $x = $diskon / 100 * $detail->final_price;
+                    $detail->final_price = $detail->final_price + $x;
+                } else {
+                    $detail->discount = $diskon;
+                    $detail->final_price = $detail->final_price + $diskon;
+                }
+            } else {
+                $detail->discount = 0;
+            }
+            $detail->update();        
+        
+        } else if ($detail->isSpecialCase == 0) {
+            if ($diskon != 0) {
+                if ( 0 < $diskon && $diskon <= 100 ) {
+                    $detail->discount = $diskon;
+                    $x = $diskon / 100 * $detail->final_price;
+                    $detail->final_price = $detail->final_price - $x;
+                } else {
+                    $detail->discount = $diskon;
+                    $detail->final_price = $detail->final_price - $diskon;
+                }
+            } else {
+                $detail->discount = 0;
+            }
+            $detail->update();
+
+        } else {
+            # code...
+        }
+        
+        foreach ($carts as $cart) {
+            
+            $total += $cart->final_price;
+            $total_item += $cart->count;
+        }
+        
+        if ($transaction) {
+            $transaction->total_price = $total;
+            $transaction->update();
+        } else {
+        }
+        
+    }
+    
     public function update(Request $request, $id)
     {
-        $transaction = Penjualan::find(session('transaction_id'));
+        $transaction = Pembelian::find(session('transaction_id'));
         $total=0;
         $total_item=0;
         $carts = Cart::where('customer_id', session('customer_id'))->get();
@@ -601,5 +942,14 @@ class PembelianDetailController extends Controller
         }
         
         return response()->json($data);
+    }
+
+    public function cancel( $id_product,$customer_id)
+    {
+        // $cart = Cart::find($id);
+        $cart = Cart::where('customer_id', $customer_id)->where('product_id', $id_product)->where('isSend', 1)->where('flag', 0)->first();
+
+        $cart->delete();
+
     }
 }

@@ -9,7 +9,7 @@ class Produk extends Model
 {
     use HasFactory;
 
-    protected $table = 'product';
+    protected $table = 'produk_master';
     protected $primaryKey = 'id';
     protected $guarded = [];
 
@@ -18,9 +18,13 @@ class Produk extends Model
         return $this->hasMany(Cart::class);
     }
 
-
     public function listproducttransaction()
     {
         return $this->hasMany(ListProductTransaction::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'kategori', 'id');
     }
 }

@@ -16,7 +16,7 @@
         <div class="box">
             <div class="box-body text-center">
                 <h1>Selamat Datang</h1>
-                <h2>Anda login sebagai PENDAMPING</h2>
+                <h2>Anda login sebagai Staff</h2>   
                 <br>
                 <a href="{{ route('member.index') }}" class="btn btn-primary btn-lg btn-block">List Customer</a>
                 <br>

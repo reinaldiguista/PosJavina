@@ -6,12 +6,12 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" id="exampleModalLabel">Info Stonk website IsiTaman</h4>
+                <h4 class="modal-title" id="exampleModalLabel">Tambahkan Produk</h4>
             </div>
 
             <div class="modal-body">
                 <div class="form-group row">
-                    <label style="float: left" for="nominal" class="col-lg-2 control-label">SKU</label>
+                    <label style="float: left" for="nominal" class="col-lg-2 control-label">ID Produk</label>
                     <div id="sku" style="float: right" class="col-lg-8">
                         <input style="align-content: flex-end" type="text" id="sku_produk" name="sku_produk" class="form-control" readonly>
                     </div>
@@ -22,23 +22,28 @@
                     <div id="stock" style="float: right" class="col-lg-8">
                         <input style="align-content: flex-end" type="text" id="stock_produk" name="stock_produk" class="form-control" readonly>
                         <br>
-                        <button name="sukses" id="sukses" style="display: none" class="btn btn-success btn-sm fa fa-check-circle-o"> success</button>
-                        <button name="gagal" id="gagal" style="display: none" class="btn btn-danger btn-sm fa fa-times-circle-o"> failed</button>
+                        <button name="sukses" id="sukses" style="display: none" class="btn btn-success btn-sm fa fa-check-circle-o"> isitaman</button>
+                        <button name="gagal" id="gagal" style="display: none" class="btn btn-danger btn-sm fa fa-times-circle-o"> local</button>
                     </div>
                 </div>
                 <div class="form-group row">
                     <p style="text-align: center">
-                        Masukkan jumlah produk yang ingin dibeli :
+                        {{-- Masukkan jumlah produk yang ingin dibeli : --}}
                     </p>
                     {{-- <label  for="nominal" class="col-lg control-label">Masukkan Jumlah Produk yang ingin dibeli</label>            --}}
                 </div>
                 
                 <div class="form-group row">
-                    <label style="float: left" for="nominal" class="col-lg-2 control-label">Jumlah</label>
+                    <label style="float: left" for="nominal" class="col-lg-2 control-label">Jumlah Produk</label>
                     <div id="jumlah_beli" style="float: right" class="col-lg-8">
                         <input style="align-content: flex-end" type="text" id="produk_kembali" name="produk_kembali" class="form-control">
                     </div>
-
+                </div>
+                <div class="form-group row">
+                    <label style="float: left" for="nominal" class="col-lg-2 control-label">Harga Satuan</label>
+                    <div id="jumlah_beli" style="float: right" class="col-lg-8">
+                        <input style="align-content: flex-end" type="text" id="harga_satuan" name="harga_satuan" class="form-control">
+                    </div>
                 </div>
             </div>
 
@@ -49,13 +54,19 @@
                 @foreach ($produk as $key => $item)
                                   
             @endforeach --}}
+            {{-- <a style="margin-bottom: 5px" href="#" class="btn btn-info btn-block btn-flat"
+                            onclick="kirimProduk()">
+                            <i class="fa fa-arrow-up"></i>
+                            Tambah Stok
+                        </a>  --}}
             <button type="button" class="btn btn-danger" data-dismiss="modal">Batal</button>
                         
-                        <a href="#" class="btn btn-success btn-flat"
+                        <a href="#" class="btn btn-success "
                             onclick="pilihProduk()">
-                            <i class="fa fa-arrow-down"></i>
+                            {{-- <i class="fa fa-arrow-down"></i> --}}
                             Beli
                         </a>  
+                        
             </div>
         </div>
     </div>

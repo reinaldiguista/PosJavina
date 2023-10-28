@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
     <meta charset="utf-8">
@@ -34,6 +35,7 @@
   <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- Google Font -->
     <link rel="stylesheet"
@@ -41,7 +43,7 @@
 
     @stack('css')
 </head>
-<body onload="cek_sync()" class="hold-transition skin-purple-light sidebar-mini">
+<body onload="cek_sync()" onbeforeunload="cek_sync()" class="hold-transition skin-black sidebar-mini">
     <div class="wrapper">
 
         @includeIf('layouts.header')

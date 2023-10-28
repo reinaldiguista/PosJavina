@@ -12,8 +12,12 @@
                         <th width="5%">No</th>
                         <th>Kode</th>
                         <th>Nama</th>
+                        <th>Harga</th>
                         <th>Jumlah</th>
                         <th>Total</th>
+                        <th>Diskon</th>
+                        <th>Harga Akhir</th>
+                        <th>Tipe</th>
                     </thead>
                     <tbody>
                         

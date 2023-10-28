@@ -12,9 +12,9 @@
             </div>
             <div class="pull-left info">
                 <p>{{ auth()->user()->name }}</p>
-                <button onclick="snyc()" class="btn btn-xs"><i class="fa fa-handshake-o"></i> Sync all</button>
+                {{-- <button onclick="bug()" class="btn btn-primary btn-xs"><i class="fa fa-handshake-o"></i> Sync all</button>
                 <i id="check" name="check" style="display: none; float:right;" class="fa fa-check-circle text-success"></i>
-                <i id="times" name="times" style="display: none; float: right;" class="fa fa-times-circle text-danger"></i>
+                <i id="times" name="times" style="display: none; float: right;" class="fa fa-times-circle text-danger"></i> --}}
             </div>
         </div>
         
@@ -26,16 +26,53 @@
                     <i class="fa fa-dashboard"></i> <span>Dashboard</span>
                 </a>
             </li>
-
+            {{-- <li>
+                <a href="{{ route('export_excel.index') }}">
+                    <i class="fa fa-file-excel-o"></i> <span>Export Produk</span>
+                </a>
+            </li> --}}
         @if (auth()->user()->level == 1)
-            <li class="header">MASTER</li>
+            <li class="header">MASTER PRODUK</li>
+            
+            {{-- <li>
+                <a href="{{ route('import-view') }}">
+                    <i class="fa fa-cubes"></i> <span>Replace Stock</span>
+                </a>
+            </li> --}}
             <li>
                 <a href="{{ route('produk.index') }}">
                     <i class="fa fa-cubes"></i> <span>Produk</span>
                 </a>
             </li>
-
+            {{-- <li>
+                <a href="{{ route('export_excel.index') }}">
+                    <i class="fa fa-file-excel-o"></i> <span>Export Produk</span>
+                </a>
+            </li> --}}
             <li>
+                <a href="{{ route('price.index') }}">
+                    <i class="fa fa-file-excel-o"></i> <span>Export Price</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('price_rules.index') }}">
+                    <i class="fa fa-file-excel-o"></i> <span>Export Price Rules</span>
+                </a>
+            </li>
+
+            {{-- <li>
+                <a href="{{ route('stock.index') }}">
+                    <i class="fa fa-download"></i> <span>Stok Barang</span>
+                </a>
+            </li> --}}
+            
+            {{-- <li>
+                <a href="{{ route('produk.stock_replace') }}">
+                    <i class="fa fa-handshake-o"></i> <span>Stok Replace</span>
+                </a>
+            </li> --}}
+            {{-- <li class="header">SINKRONISASI PRODUK</li> --}}
+            {{-- <li>
                 <a href="{{ route('job_api.index') }}">
                     <i class="fa fa-cube"></i> <span>Produk Not Sync</span>
                 </a>
@@ -45,7 +82,7 @@
                 <a href="{{ route('job_api.local_product') }}">
                     <i class="fa fa-database"></i> <span>Produk Local</span>
                 </a>
-            </li>
+            </li> --}}
 
             <li>
                 <a href="{{ route('member.index') }}">
@@ -55,28 +92,87 @@
             <li class="header">TRANSAKSI</li>
             <li>
                 <a  href="{{ route('cart.index') }}">
-                    <i class="fa fa-shopping-cart"></i> <span>Daftar Cart</span>
+                    <i class="fa fa-superpowers"></i> <span>ALL</span>
                 </a>
             </li>
+            <li>
+                <a  href="{{ route('cart.index_kasir') }}">
+                    <i class="fa fa-money"></i> <span>Transaksi</span>
+                </a>
+            </li>
+
+            <li>
+                <a  href="{{ route('cart.index_staff') }}">
+                    <i class="fa fa-shopping-cart"></i> <span>Keranjang</span>
+                </a>
+            </li>
+            
             <li>
                 <a onclick="bug()" href="{{ route('pembelian.index') }}">
-                    <i class="fa fa-upload"></i> <span>List Transaksi</span>
+                    <i class="fa fa-upload"></i> <span>Riwayat Transaksi</span>
                 </a>
             </li>
-            <li>
+            {{-- <li>
                 <a  href="{{ route('invoice.index') }}">
                     <i class="fa fa-credit-card"></i> <span>Invoice</span>
                 </a>
             </li>
+            <li>
+                <a onclick="bug()" href="{{ route('pembelian.order_online') }}">
+                    <i class="fa fa-upload"></i> <span>Order Online</span>
+                </a>
+            </li> --}}
+            
             {{-- <li>
                 <a href="{{ route('pembelian_detail.index') }}">
                     <i class="fa fa-cart-plus"></i> <span>Transaksi Aktif</span>
                 </a>
             </li> --}}
-            {{-- <li class="header">REPORT</li>
-            <li>
+            <li class="header">REPORT</li>
+            
+            {{-- <li>
                 <a href="{{ route('laporan.index') }}">
-                    <i class="fa fa-file-pdf-o"></i> <span>Laporan</span>
+                    <i class="fa fa-file-pdf-o"></i> <span>Per Tanggal</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('laporan.harian_index') }}">
+                    <i class="fa fa-file-pdf-o"></i> <span>Per Hari</span>
+                </a>
+            </li> --}}
+            <li class="treeview">
+                <a href="#">
+                  <i class="fa fa-database"></i> <span>Harian</span>
+                  <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                  </span>
+                </a>
+                <ul class="treeview-menu">
+                  <li><a href="{{ route('laporan.day_cart') }}"><i class="fa fa-file-pdf-o"></i> Detail Cart Harian</a></li>
+                  <li><a href="{{ route('laporan.detail_day') }}"><i class="fa fa-file-pdf-o"></i> Detail Hari</a></li>
+                  <li><a href="{{ route('laporan.day_order') }}"><i class="fa fa-file-pdf-o"></i> Harian by Order</a></li>
+                  <li><a href="{{ route('laporan.day_payment') }}"><i class="fa fa-file-pdf-o"></i> Harian by Payment</a></li>
+                </ul>
+            </li>
+
+            {{-- <li>
+                <a href="{{ route('laporan.day_cart') }}">
+                    <i class="fa fa-database"></i> <span>Detail Cart Harian</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('laporan.detail_day') }}">
+                    <i class="fa fa-file-pdf-o"></i> <span>Detail Hari</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('laporan.day_order') }}">
+                    <i class="fa fa-file-pdf-o"></i> <span>Harian by Order</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('laporan.day_payment') }}">
+                    <i class="fa fa-file-pdf-o"></i> <span>Harian by Payment</span>
                 </a>
             </li> --}}
             <li class="header">SYSTEM</li>
@@ -85,11 +181,11 @@
                     <i class="fa fa-users"></i> <span>User</span>
                 </a>
             </li>
-            <li>
+            {{-- <li>
                 <a href="{{ route('diskon.index') }}">
                     <i class="fa fa-percent"></i> <span>Diskon</span>
                 </a>
-            </li>
+            </li> --}}
             
         
         @elseif(auth()->user()->level == 2)
@@ -97,16 +193,16 @@
         <li class="header">MASTER</li>
 
             <li>
-                <a href="{{ route('produk.only_produk') }}">
+                <a href="{{ route('produk.index') }}">
                     <i class="fa fa-cubes"></i> <span>Produk</span>
                 </a>
             </li>
 
-            <li>
+            {{-- <li>
                 <a href="{{ route('job_api.index') }}">
                     <i class="fa fa-cube"></i> <span>Produk Not Sync</span>
                 </a>
-            </li>
+            </li> --}}
 
             <li>
                 <a href="{{ route('member.index') }}">
@@ -134,12 +230,12 @@
                 </a>
             </li> --}}
 
-        <li class="header">SYSTEM</li>
-            <li>
-                <a href="{{ route('diskon.index') }}">
-                    <i class="fa fa-percent"></i> <span>Diskon</span>
-                </a>
-            </li>
+            {{-- <li class="header">SYSTEM</li>
+                <li>
+                    <a href="{{ route('diskon.index') }}">
+                        <i class="fa fa-percent"></i> <span>Diskon</span>
+                    </a>
+                </li> --}}
         
         
         @elseif(auth()->user()->level == 3)
@@ -147,16 +243,16 @@
         <li class="header">MASTER</li>
 
             <li>
-                <a href="{{ route('produk.only_produk') }}">
+                <a href="{{ route('produk.index') }}">
                     <i class="fa fa-cubes"></i> <span>Produk</span>
                 </a>
             </li>
 
-            <li>
+            {{-- <li>
                 <a href="{{ route('job_api.index') }}">
                     <i class="fa fa-cube"></i> <span>Produk Not Sync</span>
                 </a>
-            </li>
+            </li> --}}
 
             <li>
                 <a href="{{ route('member.index') }}">
@@ -166,9 +262,15 @@
         
         
         <li class="header">TRANSAKSI</li>
-            <li>
+            {{-- <li>
                 <a href="{{ route('cart.index') }}">
                     <i class="fa fa-shopping-cart"></i> <span>Daftar Cart</span>
+                </a>
+            </li> --}}
+
+            <li>
+                <a  href="{{ route('cart.index') }}">
+                    <i class="fa fa-shopping-cart"></i> <span>Keranjang</span>
                 </a>
             </li>
 
@@ -177,29 +279,49 @@
                     <i class="fa fa-upload"></i> <span>List Transaksi</span>
                 </a>
             </li>
-        
-        {{-- <li class="header">REPORT</li>
-            <li>
-                <a href="{{ route('laporan.index') }}">
-                    <i class="fa fa-file-pdf-o"></i> <span>Laporan</span>
+            {{-- <li>
+                <a onclick="bug()" href="{{ route('pembelian.order_online') }}">
+                    <i class="fa fa-upload"></i> <span>Order Online</span>
+                </a>
+            </li> --}}
+            {{-- <li>
+                <a  href="{{ route('invoice.index') }}">
+                    <i class="fa fa-credit-card"></i> <span>Invoice</span>
                 </a>
             </li> --}}
         
+        <li class="header">REPORT</li>
+           
+
+            <li class="treeview">
+                <a href="#">
+                  <i class="fa fa-database"></i> <span>Harian</span>
+                  <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                  </span>
+                </a>
+                <ul class="treeview-menu">
+                  <li><a href="{{ route('laporan.day_cart') }}"><i class="fa fa-file-pdf-o"></i> Detail Cart Harian</a></li>
+                  <li><a href="{{ route('laporan.detail_day') }}"><i class="fa fa-file-pdf-o"></i> Detail Hari</a></li>
+                  <li><a href="{{ route('laporan.day_order') }}"><i class="fa fa-file-pdf-o"></i> Harian by Order</a></li>
+                  <li><a href="{{ route('laporan.day_payment') }}"><i class="fa fa-file-pdf-o"></i> Harian by Payment</a></li>
+                </ul>
+            </li>
         
         
         @elseif(auth()->user()->level == 4)
         <li class="header">MASTER</li>
         <li>
-            <a href="{{ route('produk.only_produk') }}">
+            <a href="{{ route('produk.index') }}">
                 <i class="fa fa-cubes"></i> <span>Produk</span>
             </a>
         </li>
 
-        <li>
+        {{-- <li>
             <a href="{{ route('job_api.index') }}">
                 <i class="fa fa-cube"></i> <span>Produk Not Sync</span>
             </a>
-        </li>
+        </li> --}}
         
         <li>
             <a href="{{ route('member.index') }}">
@@ -210,7 +332,7 @@
     <li class="header">TRANSAKSI</li>
         
         <li>
-            <a href="{{ route('cart.index') }}">
+            <a href="{{ route('cart.index_staff') }}">
                 <i class="fa fa-shopping-cart"></i> <span>Daftar Cart</span>
             </a>
         </li>
@@ -258,7 +380,7 @@
                         alert('success');
 
                     } else {
-                        alert('terjadi kegagalan');
+                        // alert('terjadi kegagalan');
                     }
                     table.ajax.reload();                    
                 })
@@ -267,6 +389,7 @@
         }
 
         function bug() {
+            console.log('bug');
             $.get(`{{ url('/pembelian/bug') }}`, {
                     // '_token': $('[name=csrf-token]').attr('content'),
                     '_method': 'get'
@@ -276,7 +399,7 @@
                         alert('success');
 
                     } else {
-                        alert('terjadi kegagalan');
+                        // alert('terjadi kegagalan');
                     }
                     table.ajax.reload();                    
                 })

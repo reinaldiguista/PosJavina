@@ -15,6 +15,6 @@ class PenjualanDetail extends Model
 
     public function produk()
     {
-        return $this->hasOne(Produk::class, 'id', 'product_id');
+        return $this->hasOne(ProdukNew::class, 'id', 'product_id');
     }
 }

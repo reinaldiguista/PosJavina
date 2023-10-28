@@ -47,7 +47,7 @@
 </div>
 <!-- /.row -->
 <!-- Main row -->
-<div class="row">
+{{-- <div class="row">
     <div class="col-lg-12">
         <div class="box">
             <div class="box-header with-border">
@@ -70,7 +70,7 @@
         <!-- /.box -->
     </div>
     <!-- /.col -->
-</div>
+</div> --}}
 <!-- /.row (main row) -->
 @endsection
 

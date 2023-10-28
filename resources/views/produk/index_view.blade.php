@@ -24,11 +24,11 @@
                             <th>Kode</th>
                             <th>Title</th>
                             <th>stock</th>
-                            <th>Online Price</th>
+                            {{-- <th>Online Price</th>
                             <th>Offline price</th>
                             <th>Agen price</th>
                             <th>Reseller_price</th>
-                            <th>no. meja</th>
+                            <th>no. meja</th> --}}
                             <th width="15%"><i class="fa fa-cog"></i></th>
                         </thead>
                     </table>
@@ -54,17 +54,17 @@
             serverSide: true,
             autoWidth: false,
             ajax: {
-                url: '{{ route('produk.data') }}',
+                url: '{{ route('produk.data_cepat') }}',
             },
             columns: [
                 {data: 'kode_produk'},
                 {data: 'title'},
                 {data: 'stock'},
-                {data: 'price'},
-                {data: 'offline_price'},
-                {data: 'agen_price'},
-                {data: 'reseller_price'},
-                {data: 'nomor_meja'},
+                // {data: 'price'},
+                // {data: 'offline_price'},
+                // {data: 'agen_price'},
+                // {data: 'reseller_price'},
+                // {data: 'nomor_meja'},
                 {data: 'cek_stok'},
             ]
         });

@@ -45,9 +45,10 @@ class MemberController extends Controller
             })
             ->addColumn('aksi', function ($member) {
                 return '
-                <div class="btn-group">
-                    <button type="button" onclick="editForm(`'. route('member.update', $member->id) .'`)" class="btn btn-xs btn-info "><i class="fa fa-pencil"></i>Edit Member</button>
-                    <button type="button" onclick="deleteData(`'. route('member.destroy', $member->id) .'`)" class="btn btn-xs btn-danger "><i class="fa fa-trash"></i>Hapus Member</button>
+                <div >
+                    
+                    <button style="margin-top :5px" type="button" onclick="editForm(`'. route('member.update', $member->id) .'`)" class="btn btn-xs btn-info "><i class="fa fa-pencil"></i></button>
+                    <button style="margin-top :5px" type="button" onclick="deleteData(`'. route('member.destroy', $member->id) .'`)" class="btn btn-xs btn-danger "><i class="fa fa-trash"></i></button>
                 </div>
                 ';
             })

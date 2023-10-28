@@ -19,7 +19,7 @@
             <div class="box-body table-responsive">
                 <form action="" method="post" class="form-member">
                     @csrf
-                    <table class="table table-stiped table-bordered">
+                    <table class="table table-stiped table-bordered table-invoice">
                         <thead>
                             <th width="5%">No</th>
                             <th>Nomor Invoice</th>
@@ -40,14 +40,16 @@
 </div>
 
 @includeIf('invoice.form')
+@includeIf('invoice.detail')
+
 @endsection
 
 @push('scripts')
 <script>
-    let table;
+    let table, table1;
 
     $(function () {
-        table = $('.table').DataTable({
+        table = $('.table-invoice').DataTable({
             responsive: true,
             processing: true,
             serverSide: true,
@@ -68,6 +70,21 @@
                 {data: 'aksi', searchable: false, sortable: false},
             ]
         });
+
+        table1 = $('.table-detail').DataTable({
+            processing: true,
+            bSort: false,
+            dom: 'Brt',
+            columns: [
+                {data: 'DT_RowIndex', searchable: false, sortable: false},
+                {data: 'invoice_id'},
+                {data: 'name'},
+                {data: 'payment_method'},
+                {data: 'amount'},
+                {data: 'payment_date'},
+
+            ]
+        })
 
         $('#modal-form').validator().on('submit', function (e) {
             if (! e.preventDefault()) {
@@ -149,5 +166,51 @@
     //             .submit();
     //     }
     // }
+
+    function detail(url) {
+        $('#modal-detail').modal('show');
+        console.log(url);
+        table1.ajax.url(url);
+        table1.ajax.reload();
+    }
+    function pay(url) {
+        // console.log(url);
+            $.get(url, {
+                    '_token': $('[name=csrf-token]').attr('content'),
+                    '_method': 'get'
+                })
+                .done((response) => {
+                    table.ajax.reload();
+                })
+                .fail((errors) => {
+                    alert('fail');
+                    return;
+                });
+    }
+    function cancel(url) {
+        // console.log(url);
+        if (confirm('Yakin ingin Cancel Invoice terpilih?')) {
+            console.log(url);
+            $.get(url, {
+                    '_token': $('[name=csrf-token]').attr('content'),
+                    '_method': 'get',
+                })
+                .done(response => {
+                    console.log(response.status);
+                    if (response.status == 'success') {
+                        // alert('Invoice berhasil cancel');
+                        table.ajax.reload();                    
+                    } else {
+                        // alert('data berhasil terhapus dari local, namun belum sinkron');
+                        table.ajax.reload();                    
+                    }                 
+                })
+                .fail(errors => {
+                    console.log(respones.status);
+                    alert('terjadi kegagalan');
+                    table.ajax.reload();                    
+                });
+        }
+    }
 </script>
 @endpush

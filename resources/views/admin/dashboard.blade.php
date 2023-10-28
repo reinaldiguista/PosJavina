@@ -4,6 +4,15 @@
     Dashboard
 @endsection
 
+@push('css')
+<style>
+    /* .content-wrapper {
+       background: pink;
+       // here you can add also a image
+    } */
+    </style>   
+@endpush
+
 @section('breadcrumb')
     @parent
     <li class="active">Dashboard</li>
@@ -47,7 +56,7 @@
 </div>
 <!-- /.row -->
 <!-- Main row -->
-<div class="row">
+{{-- <div class="row">
     <div class="col-lg-12">
         <div class="box">
             <div class="box-header with-border">
@@ -70,7 +79,7 @@
         <!-- /.box -->
     </div>
     <!-- /.col -->
-</div>
+</div> --}}
 <!-- /.row (main row) -->
 @endsection
 

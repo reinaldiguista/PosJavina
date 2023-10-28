@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\Member;
 use App\Models\Penjualan;
 use App\Models\Produk;
+use App\Models\ProdukNew;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -21,7 +22,7 @@ class DashboardController extends Controller
         ->distinct()
         ->get();
         
-        $produk = Produk::count();
+        $produk = ProdukNew::count();
         $members = Member::count();
 
         $tanggal_awal = date('Y-m-01');

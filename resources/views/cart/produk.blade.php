@@ -1,5 +1,5 @@
 <div class="modal fade" id="modal-produk" tabindex="-1" role="dialog" aria-labelledby="modal-produk">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-m" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
@@ -12,6 +12,8 @@
                     <thead>
                         <th>SKU</th>
                         <th>title</th>
+                        <th>Harga Terendah</th>
+                        <th>Harga End User</th>
                         <th><i class="fa fa-cog"></i></th>
                     </thead>
                     <tbody>
@@ -21,19 +23,31 @@
                             @foreach ($produk as $key => $item)
                                 <tr>
                                     <td>{{ $item->sku }}</td>
-                                    <td>{{ $item->title }}</td>
+                                    <td>{{ $item->nama_produk }}</td>
+                                    <td>{{ format_uang($item->harga_terendah) }}</td>
+
+                                    @if ($item->price->harga_1)
+                                        <td>{{ format_uang($item->price->harga_1) }}</td>
+                                    @else
+                                        <td>Rp. 0</td>
+                                    @endif
+
                                     <td>
-                                    {{-- <a href="#" class="btn btn-primary btn-xs btn-flat"
+                                    {{-- <a href="#" class="btn btn-success btn-xs "
                                         onclick="pilihProduk('{{ $item->id }}')">
                                         <i class="fa fa-check-circle"></i>
                                         Pilih
                                     </a> --}}
+                                    <label class="switch">
+                                        <input onclick="multi({{ $item->id }}, this);" id="{{ $item->id }}"   type="checkbox">
+                                        <span class="slider round"></span>
+                                    </label>
     
-                                    <a href="#" class="btn btn-success btn-xs btn-flat"
+                                    {{-- <a href="#" class="btn btn-success btn-xs btn-flat"
                                         onclick="cekStok('{{ route('produk.sku', $item->sku) }}')">
                                         <i class="fa fa-cubes"></i>
                                         Pilih
-                                    </a>
+                                    </a> --}}
                                     </td>
                                 </tr>
                             @endforeach

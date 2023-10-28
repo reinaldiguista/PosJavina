@@ -13,6 +13,13 @@
                 </div>
                 
                 <div class="modal-body">
+                    <div class="hidden form-group row">
+                        {{-- <label for="invoice_id" class="col-lg-2 col-lg-offset-1 control-label">invoice_id</label> --}}
+                        <div class="col-lg-6">
+                            <input type="hidden" name="invoice_id" id="invoice_id" class="form-control" required autofocus>
+                            <span class="help-block with-errors"></span>
+                        </div>
+                    </div>
                     <div class="form-group row">
                         <label for="customer" class="col-lg-2 col-lg-offset-1 control-label">Customer</label>
                         <div class="col-lg-6">
@@ -20,7 +27,7 @@
                             <span class="help-block with-errors"></span>
                         </div>
                     </div>
-                    <div class="form-group row">
+                    {{-- <div class="form-group row">
                         <label for="number_invoice" class="col-lg-2 col-lg-offset-1 control-label">number_invoice</label>
                         <div class="col-lg-6">
                             <input type="text" name="number_invoice" id="number_invoice" class="form-control" required>
@@ -33,7 +40,7 @@
                             <input type="text" name="number_ref" id="number_ref" rows="3" class="form-control" required>
                             <span class="help-block with-errors"></span>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="form-group row">
                         <label for="invoice_amount" class="col-lg-2 col-lg-offset-1 control-label">invoice_amount</label>
                         <div class="col-lg-6">
@@ -66,8 +73,8 @@
                 
                 
                 <div class="modal-footer">
-                    <button class="btn btn-sm btn-flat btn-primary"><i class="fa fa-save"></i> Simpan</button>
-                    <button type="button" class="btn btn-sm btn-flat btn-warning" data-dismiss="modal"><i class="fa fa-arrow-circle-left"></i> Batal</button>
+                    <button onclick="confirm()" type="button" class="btn-sm btn-flat btn-success" ><i class="fa fa-save"></i> Simpan</button>
+                    <button onclick="cancel()" type="button" class=" btn-sm btn-flat btn-warning" data-dismiss="modal"><i class="fa fa-arrow-circle-left"></i> Batal</button>
                 </div>
             </div>
 

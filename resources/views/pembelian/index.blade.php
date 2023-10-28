@@ -14,10 +14,10 @@
     <div class="col-lg-12">
         <div class="box">
             <div class="box-header with-border">
-                <button onclick="addForm()" class="btn btn-info btn-lg btn-block"><i class="fa fa-plus-circle"></i> Proses Transaksi</button>
-                <button onclick="addCustomer()" class="btn btn-success btn-lg btn-block"><i class="fa fa-cart-plus"></i> Buat Transaksi</button>
+                {{-- <button onclick="addForm()" class="btn btn-info btn-lg btn-block"><i class="fa fa-plus-circle"></i> Proses Transaksi</button>
+                <button onclick="addCustomer()" class="btn btn-success btn-lg btn-block"><i class="fa fa-cart-plus"></i> Buat Transaksi</button> --}}
                 @empty(! session('id_pembelian'))
-                <a href="{{ route('pembelian_detail.index') }}" class="btn btn-info btn-xs btn-flat"><i class="fa fa-pencil"></i> Transaksi Aktif</a>
+                {{-- <a href="{{ route('pembelian_detail.index') }}" class="btn btn-info btn-xs btn-flat"><i class="fa fa-pencil"></i> Transaksi Aktif</a> --}}
                 @endempty
             </div>
             <div class="box-body table-responsive">
@@ -59,7 +59,7 @@
             },
             columns: [
                 {data: 'DT_RowIndex', searchable: false, sortable: false},
-                {data: 'tanggal'},
+                // {data: 'tanggal'},
                 {data: 'customer'},
                 {data: 'number_ref'},
                 {data: 'total_harga'},
@@ -76,13 +76,17 @@
         table1 = $('.table-detail').DataTable({
             processing: true,
             bSort: false,
-            dom: 'Brt',
             columns: [
                 {data: 'DT_RowIndex', searchable: false, sortable: false},
                 {data: 'kode_produk'},
                 {data: 'nama_produk'},
+                {data: 'base_price'},
                 {data: 'jumlah'},
                 {data: 'total_price'},
+                {data: 'diskon'},
+                {data: 'final_price'},
+                {data: 'special_case'},
+
             ]
         })
     });
@@ -97,7 +101,7 @@
 
     function showDetail(url) {
         $('#modal-detail').modal('show');
-
+        console.log(url);
         table1.ajax.url(url);
         table1.ajax.reload();
     }

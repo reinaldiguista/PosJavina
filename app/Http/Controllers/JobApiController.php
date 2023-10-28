@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\JobApi;
+use App\Models\ListProductTransaction;
+use App\Models\Pembelian;
 use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
+
 
 class JobApiController extends Controller
 {
@@ -108,6 +112,25 @@ class JobApiController extends Controller
 
     public function sync_all()
     {
+        $pembelian = Pembelian::where('order_type', 0)->get();
+
+        foreach ($pembelian as $item) {
+
+            $item->delete();
+        }
+
+        // $jobs = JobApi::where('status', 0)->orderBy('created_at', 'asc')->get();
+        // $transaction = Pembelian::orderBy('created_at', 'asc')->get();
+
+        // foreach ($transaction as $key ) {
+            
+        //     $lsp = ListProductTransaction::where('transaction_id', $key->id)->get();
+
+        //     foreach ($lsp as $value) {
+        //         $value->created_at = $key->created_at;
+        //         $value->update();
+        //     }
+        // }
 
         $jobs = JobApi::where('status', 0)->orderBy('created_at', 'asc')->get();
 
@@ -118,36 +141,71 @@ class JobApiController extends Controller
             $stock = $job->count;
             $sku = $job->sku;
 
-            try {
-                $response = Http::put('https://pos.isitaman.com/product/updateBySku', [
-                    'username' => 'isitaman',
-                    'password' => '1s1t4m4nJ@v1n4.',
-                    'action' => $action,
-                    'stock' => $stock,
-                    'sku' => $sku,
-                ])['data'];
+
+            if ($action == "replace") {
+                try {
+                    $response = Http::put('https://pos.isitaman.com/product/replaceStockBySku', [
+                        'username' => 'isitaman',
+                        'password' => '1s1t4m4nJ@v1n4.',
+                        'stock' => $stock,
+                        'sku' => $sku,
+                    ])['data'];
+                    
+                    $data  = [
+                        'sku' => $response['sku'],
+                        'stock' => $response['stock']
+                    ];
+            
+                    // $produk->stock = $response['stock'];
+                    // $produk->stock_isitaman = $response['stock'];
+                    // $produk->isSync = 1;
+                    // $produk->update();
+                    $produk->stock = $response['stock'];
+                    $produk->isSync = 1;
+                    $produk->update();
+
+                    $job->status = 1;
+                    $job->update();
     
-                $data  = [
-                    'sku' => $response['sku'],
-                    'stock' => $response['stock'],
-                    'status' => "sukses"
-                ];
+                } catch (\Throwable $th) {
+
+                }
+            } else {
+                try {
+                    $response = Http::put('https://pos.isitaman.com/product/updateBySku', [
+                        'username' => 'isitaman',
+                        'password' => '1s1t4m4nJ@v1n4.',
+                        'action' => $action,
+                        'stock' => $stock,
+                        'sku' => $sku,
+                    ])['data'];
         
-                $produk->stock = $response['stock'];
-                $produk->isSync = 1;
-                $produk->update();
-    
-                $job->status = 1;
-                $job->update();
+                    $data  = [
+                        'sku' => $response['sku'],
+                        'stock' => $response['stock'],
+                        'status' => "sukses"
+                    ];
+            
+                    $produk->stock = $response['stock'];
+                    $produk->isSync = 1;
+                    $produk->update();
         
-            } catch (\Throwable $th) {
-                $data  = [
-                    'sku' => $sku,
-                    'stock' => $stock,
-                    'status' => "Data produk gagal sinkron"
-                ];
-            }        
+                    $job->status = 1;
+                    $job->update();
+            
+                } catch (\Throwable $th) {
+                    $data  = [
+                        'sku' => $sku,
+                        'stock' => $stock,
+                        'status' => "Data produk gagal sinkron"
+                    ];
+                }
+            }
+            
+                    
         }
+
+        
         return response($data);
 
     }
@@ -217,6 +275,7 @@ class JobApiController extends Controller
     {
         
         $produk = Produk::orderBy('sku', 'asc')->where('isLocal' , 1)->get();
+        // $produk = Produk::orderBy('sku', 'asc')->where('id','>', 500)->where('id','<', 1001)->get();
 
         return datatables()
             ->of($produk)
@@ -225,7 +284,7 @@ class JobApiController extends Controller
                 return '<span class="label label-success">'. $produk->sku .'</span>';
             })
             ->addColumn('title', function ($produk) {
-                return $produk->title ;
+                return $produk->id ;
             })
             ->addColumn('stock', function ($produk) {
                 return format_uang($produk->stock);
@@ -284,27 +343,31 @@ class JobApiController extends Controller
                     // var_dump($response);
 
                     } else {
+                    
+                    $produk->isSync = 0;
+                    $produk->isLocal = 1;
+                    $produk->update();
+                        
                     $data  = [
                         'sku' => $sku,
                         'stock' => $response['stock'],
                         'status' => "fail_connect"
-                    ];
-
-                    $produk->isSync = 0;
-                    $produk->isLocal = 1;
-                    $produk->update();
+                    ];    
                     
                     } 
 
             } catch (\Throwable $th) {
+                
+                $produk->isSync = 0;
+                $produk->isLocal = 1;
+                $produk->update();
+
                 $data  = [
                     'sku' => $sku,
                     'stock' => $produk->stock,
                     'status' => 'fail_produk'
                 ]; 
-                    $produk->isSync = 0;
-                    $produk->isLocal = 1;
-                    $produk->update();
+                    
             }
 
     } else { //produk sudah upload
@@ -318,13 +381,17 @@ class JobApiController extends Controller
         $job = JobApi::where('sku', $sku)->where('status', 0)->first();    
         
         if ($job) {
+
+            $produk->isSync = 0;
+            $produk->isLocal = 1;
+            $produk->update();
+            
             $data  = [
                 'sku' => $sku,
                 'status' => "not_sync",
             ];
+            
         } else {
-            $produk->isSync = 0;
-            $produk->update();
 
             try {
                 $response =  Http::get('https://pos.isitaman.com/product/getBySku?username=isitaman&password=1s1t4m4nJ@v1n4.&sku='. $produk->sku )['data'];
@@ -336,13 +403,19 @@ class JobApiController extends Controller
                             'stock' => $response['stock'],
                             'status' => "sukses_update",
                         ];
-                        $produk->stock = $response['stock'];
+                        // $produk->stock = $response['stock'];
                         $produk->stock_isitaman = $response['stock'];
                         $produk->isSync = 1;
+                        $produk->isLocal = 0;
                         $produk->update();
             
                     // var_dump($response);
                 } else {
+                    
+                    $produk->isSync = 0;
+                    $produk->isLocal = 1;
+                    $produk->update();
+
                     $data  = [
                         'sku' => $produk->sku,
                         'stock' => $response['stock'],
@@ -351,13 +424,16 @@ class JobApiController extends Controller
                 }            
             } 
             catch (\Throwable $th) {
+                
+                $produk->isSync = 0;
+                $produk->isLocal = 1;
+                $produk->update();
+
                 $data  = [
                     'sku' => $produk->sku,
                     'stock' => $produk->stock,
                     'status' => 'fail_connect'
                 ]; 
-                $produk->isSync = 0;
-                $produk->update();
             }        
         }
     }
@@ -366,11 +442,15 @@ class JobApiController extends Controller
 
     public function check_all()
     {
-       $produk = Produk::where('isLocal', 1)->get();
+       $produk = Produk::get();
+    //    $produk = Produk::orderBy('sku', 'asc')->where('id','<', 500)->get();
+    //    $produk = Produk::orderBy('sku', 'asc')->where('id','<', 1001)->get();
+    //    $produk = Produk::orderBy('sku', 'asc')->where('id','>', 1000)->where('id','<', 2001)->get();
+    //    $produk = Produk::orderBy('sku', 'asc')->where('id','>', 2000)->where('id','<', 3001)->get();
+    //    $produk = Produk::orderBy('sku', 'asc')->where('id','>', 3000)->where('id','<', 4001)->get();
+    //    $produk = Produk::orderBy('sku', 'asc')->where('id','>', 4000)->get();
 
        foreach ($produk as $item) {
-        $item->isSync = 0;
-        $item->update();
 
         try {
             $response =  Http::get('https://pos.isitaman.com/product/getBySku?username=isitaman&password=1s1t4m4nJ@v1n4.&sku='. $item->sku )['data'];
@@ -381,36 +461,36 @@ class JobApiController extends Controller
                     'sku' => $item->sku,
                     'stock' => $response['stock'],
                     'status' => "sukses",
-                    
                 ];
                 $item->stock_isitaman = $response['stock'];
-                $item->isLocal = 0;
                 $item->isSync = 1;
+                $item->isLocal = 0;
                 $item->update();
     
             // var_dump($response);
         } else {
+            $item->isSync = 0;
+            $item->isLocal = 1;
+            $item->update();
+            
             $data  = [
                 'sku' => $item->sku,
                 'stock' => $response['stock'],
                 'status' => "fail_connect"
             ];
 
+            
+        } 
+        } catch (\Throwable $th) {
             $item->isSync = 0;
             $item->isLocal = 1;
             $item->update();
             
-        } 
-        } catch (\Throwable $th) {
             $data  = [
                 'sku' => $item->sku,
                 'stock' => $item->stock,
                 'status' => 'fail_produk'
             ]; 
-                    $item->isSync = 0;
-                    $item->isLocal = 1;
-                    $item->update();
-
             // var_dump($data);        
         }
     }
@@ -428,7 +508,7 @@ class JobApiController extends Controller
             $job = JobApi::where('sku', $item->sku)->first();
             
             $item->isSync = 0;
-                $item->update();
+            $item->update();
 
                 try {
                     $response =  Http::get('https://pos.isitaman.com/product/getBySku?username=isitaman&password=1s1t4m4nJ@v1n4.&sku='. $item->sku )['data'];
@@ -461,9 +541,55 @@ class JobApiController extends Controller
                         'stock' => $item->stock,
                         'status' => 'fail_produk'
                     ]; 
-                            $item->isSync = 0;
-                            $item->update();
+                            // $item->isSync = 0;
+                            // $item->update();
                 }   
+        }
+    }
+
+    public function replace()
+    {
+        $produk = Produk::where('isLocal', 0)->where('isSync', 1)->get();
+
+        foreach ($produk as $item) {
+            $job = JobApi::where('sku', $item->sku)->first();
+            
+            $item->isSync = 0;
+            $item->update();
+
+            try {
+                $response = Http::put('https://pos.isitaman.com/product/replaceStockBySku', [
+                    'username' => 'isitaman',
+                    'password' => '1s1t4m4nJ@v1n4.',
+                    'stock' => $item->stock,
+                    'sku' => $item->sku,
+                ])['data'];
+                
+                $data  = [
+                    'sku' => $response['sku'],
+                    'stock' => $response['stock']
+                ];
+        
+                $produk->stock = $response['stock'];
+                $produk->stock_isitaman = $response['stock'];
+                $produk->update();
+
+            } catch (\Throwable $th) {
+
+                $newJob = new JobApi();
+                $newJob->sku = $item->sku;
+                $newJob->count = $item->stock;
+                $newJob->action = 'replace';
+                $newJob->endpoint = 'https://pos.isitaman.com/product/replaceStockBySku';
+                $newJob->status = 0;
+                $newJob->updated_at = Carbon::now();
+                $newJob->save();
+    
+                $produk->isSync = 0;
+                $produk->update();
+                
+                return response()->json('Gagal Mengirim data ke IsiTaman', 500);
+            }   
         }
     }
 
@@ -478,13 +604,17 @@ class JobApiController extends Controller
         } else {
             $job = JobApi::where('sku', $sku)->where('status', 0)->first();    
             if ($job) {
+                
+                $produk->isSync = 0;
+                $produk->isLocal = 1;
+                $produk->update();
+
                 $data  = [
                     'sku' => $sku,
                     'status' => "not_sync",
                 ];
+
             } else {
-                $produk->isSync = 0;
-                $produk->update();
 
                 try {
                     $response =  Http::get('https://pos.isitaman.com/product/getBySku?username=isitaman&password=1s1t4m4nJ@v1n4.&sku='. $produk->sku )['data'];
@@ -500,26 +630,32 @@ class JobApiController extends Controller
                             $produk->stock = $response['stock'];
                             $produk->stock_isitaman = $response['stock'];
                             $produk->isSync = 1;
+                            $produk->isLocal = 0;
                             $produk->update();
                 
                         // var_dump($response);
                     } else {
+                    $produk->isSync = 0;
+                    $produk->isLocal = 1;
+                    $produk->update();
+                        
                         $data  = [
                             'sku' => $produk->sku,
                             'stock' => $response['stock'],
                             'status' => "fail_produk"
                         ];
-                        
                     }            
                 } 
                 catch (\Throwable $th) {
+                    $produk->isSync = 0;
+                    $produk->isLocal = 1;
+                    $produk->update();
+                    
                     $data  = [
                         'sku' => $produk->sku,
                         'stock' => $produk->stock,
                         'status' => 'fail_connect'
                     ]; 
-                    $produk->isSync = 0;
-                    $produk->update();
                 }            
             }
         }   
